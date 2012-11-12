@@ -1,0 +1,47 @@
+--- Squeak-3.10-4/platforms/unix/config/configure.orig	2012-02-28 17:52:23.106210673 -0300
++++ Squeak-3.10-4/platforms/unix/config/configure	2012-02-28 17:53:21.886211836 -0300
+@@ -30579,7 +30579,8 @@ cat >>conftest.$ac_ext <<_ACEOF
+ /* end confdefs.h.  */
+ 
+   #include <stdlib.h>
+-  #include <linux/videodev.h>
++  #include <libv4l1-videodev.h>
++  #include <linux/videodev2.h>
+ 
+ int
+ main ()
+--- Squeak-3.10-4/platforms/unix/plugins/VideoForLinuxPlugin/acinclude.m4.orig	2012-02-28 17:52:29.119210667 -0300
++++ Squeak-3.10-4/platforms/unix/plugins/VideoForLinuxPlugin/acinclude.m4	2012-02-28 17:53:30.463211833 -0300
+@@ -1,7 +1,8 @@
+ AC_MSG_CHECKING([for VideoForLinux support])
+ AC_TRY_COMPILE([
+   #include <stdlib.h>
+-  #include <linux/videodev.h>
++  #include <libv4l1-videodev.h>
++  #include <linux/videodev2.h>
+ ],[;],[
+   AC_MSG_RESULT(yes)
+ ],[
+--- Squeak-3.10-4/platforms/unix/plugins/VideoForLinuxPlugin/videolib.c.orig	2012-02-28 17:52:35.473210906 -0300
++++ Squeak-3.10-4/platforms/unix/plugins/VideoForLinuxPlugin/videolib.c	2012-02-28 17:53:34.021211940 -0300
+@@ -1,6 +1,7 @@
+ #include <errno.h>
+ #include <fcntl.h>
+-#include <linux/videodev.h>
++#include <libv4l1-videodev.h>
++#include <linux/videodev2.h>
+ #include <signal.h>
+ #include <stdio.h>
+ #include <stdlib.h>
+--- Squeak-3.10-4/platforms/unix/plugins/VideoForLinuxPlugin/videolib.h.orig	2012-02-28 17:52:41.632211010 -0300
++++ Squeak-3.10-4/platforms/unix/plugins/VideoForLinuxPlugin/videolib.h	2012-02-28 17:53:37.255211795 -0300
+@@ -3,7 +3,8 @@
+ 
+ #include "palettes.h"
+ 
+-#include <linux/videodev.h>
++#include <libv4l1-videodev.h>
++#include <linux/videodev2.h>
+ 
+ typedef int BOOLEAN;
+ #define TRUE  1

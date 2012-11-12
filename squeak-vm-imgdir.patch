@@ -1,0 +1,66 @@
+
+${libdir} changes from .../lib to .../lib64 on machines that can run both
+64 and 32 bit code, so you must consistantly use either literally "/lib"
+or ${libdir} or your code won't work on such 64 bit machines.  Also,
+using literal "lib" on 64 bit machines gets you in trouble if the stuff
+you put in "lib" isn't arch independent.  Better to use ${libdir} for
+arch dependent stuff, and ${datadir} for arch independent stuff.
+
+Move imgdir to ${datadir}, move SQ_LIBDIR to ${libdir}
+
+diff -up Squeak-3.10-3/platforms/unix/config/configure.imgdir Squeak-3.10-3/platforms/unix/config/configure
+--- Squeak-3.10-3/platforms/unix/config/configure.imgdir	2008-08-19 10:11:25.000000000 -0400
++++ Squeak-3.10-3/platforms/unix/config/configure	2008-08-21 10:58:10.000000000 -0400
+@@ -2070,8 +2070,9 @@ _ACEOF
+ # libdir contains ${exec_prefix}, so we have to default and expand early
+ test "x$prefix" = xNONE && prefix=$ac_default_prefix
+ test "x$exec_prefix" = xNONE && exec_prefix='${prefix}'
+-imgdir=`eval echo ${libdir}/squeak`
+-plgdir=`eval echo ${imgdir}/${VM_VERSION}`
++imgdir=`eval echo ${datadir}/squeak`
++squeaklibdir=`eval echo ${libdir}/squeak`
++plgdir=`eval echo ${squeaklibdir}/${VM_VERSION}`
+ 
+ 
+ 
+@@ -26734,12 +26735,7 @@ fi
+ 
+ # Install locations
+ 
+-if test "x${prefix}" = xNONE; then
+-  SQ_LIBDIR=${ac_default_prefix}/lib/squeak/${SQ_VERSION}
+-else
+-  SQ_LIBDIR=${prefix}/lib/squeak/${SQ_VERSION}
+-fi
+-
++SQ_LIBDIR=${libdir}/squeak/${SQ_VERSION}
+ 
+ cat >>confdefs.h <<_ACEOF
+ #define SQ_LIBDIR "${SQ_LIBDIR}"
+diff -up Squeak-3.10-3/platforms/unix/config/configure.ac.imgdir Squeak-3.10-3/platforms/unix/config/configure.ac
+--- Squeak-3.10-3/platforms/unix/config/configure.ac.imgdir	2008-08-19 10:11:25.000000000 -0400
++++ Squeak-3.10-3/platforms/unix/config/configure.ac	2008-08-21 10:58:10.000000000 -0400
+@@ -85,8 +85,8 @@ AC_SUBST(VM_VERSION)
+ # libdir contains ${exec_prefix}, so we have to default and expand early
+ test "x$prefix" = xNONE && prefix=$ac_default_prefix
+ test "x$exec_prefix" = xNONE && exec_prefix='${prefix}'
+-imgdir=`eval echo ${libdir}/squeak`
+-plgdir=`eval echo ${imgdir}/${VM_VERSION}`
++imgdir=`eval echo ${datadir}/squeak`
++plgdir=`eval echo ${libdir}/squeak/${VM_VERSION}`
+ 
+ AC_SUBST(imgdir)
+ AC_SUBST(plgdir)
+@@ -301,11 +301,7 @@ fi
+ 
+ # Install locations
+ 
+-if test "x${prefix}" = xNONE; then
+-  SQ_LIBDIR=${ac_default_prefix}/lib/squeak/${SQ_VERSION}
+-else
+-  SQ_LIBDIR=${prefix}/lib/squeak/${SQ_VERSION}
+-fi
++SQ_LIBDIR=${libdir}/squeak/${SQ_VERSION}
+ 
+ AC_SUBST(SQ_LIBDIR)
+ AC_DEFINE_UNQUOTED(SQ_LIBDIR,["${SQ_LIBDIR}"])

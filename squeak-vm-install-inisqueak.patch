@@ -1,0 +1,57 @@
+
+We want to install inisqueak even if we arn't installing any images from
+this Makefile.
+
+diff -up Squeak-3.10-3/platforms/unix/config/Makefile.install.install-inisqueak Squeak-3.10-3/platforms/unix/config/Makefile.install
+--- Squeak-3.10-3/platforms/unix/config/Makefile.install.install-inisqueak	2008-08-08 15:58:29.000000000 -0400
++++ Squeak-3.10-3/platforms/unix/config/Makefile.install	2008-08-08 16:41:05.000000000 -0400
+@@ -9,9 +9,9 @@ DOCFILES	= COPYING COPYRIGHT LICENSE \
+ 
+ ICONS		= $(topdir)/platforms/unix/vm-display-Quartz/Resources/SqueakVM.icns
+ 
+-install : install-squeak install-plugins install-doc $(install_nps)
++install : install-squeak install-inisqueak install-plugins install-doc $(install_nps)
+ 
+-uninstall : uninstall-squeak uninstall-plugins uninstall-doc $(uninstall_nps)
++uninstall : uninstall-squeak uninstall-inisqueak uninstall-plugins uninstall-doc $(uninstall_nps)
+ 
+ # squeak
+ 
+@@ -34,6 +34,12 @@ uninstall-squeak : .force
+ 	@$(UNINSTALL) $(ROOT)$(plgdir) $(squeak)
+ 	@$(UNINSTALL) $(ROOT)$(bindir) $(squeak)
+ 
++install-inisqueak: inisqueak
++	$(INSTALL_PROG) inisqueak $(ROOT)$(bindir)
++
++uninstall-inisqueak: .force
++	@$(UNINSTALL) $(ROOT)$(bindir) inisqueak
++
+ # plugins
+ 
+ install-plugins : plugins
+@@ -81,23 +87,15 @@ uninstall-doc :
+ 
+ # image
+ 
+-install-image : inisqueak $(topdir)/Squeak$(SQ_VERSION).image.gz $(topdir)/Squeak$(SQ_VERSION).changes.gz
++install-image : $(topdir)/Squeak$(SQ_VERSION).image.gz $(topdir)/Squeak$(SQ_VERSION).changes.gz
+ 	$(MKINSTALLDIRS) $(ROOT)$(imgdir)
+-	$(INSTALL_PROG) inisqueak $(ROOT)$(imgdir)
+ 	$(INSTALL_DATA) $(topdir)/Squeak$(SQ_VERSION).image.gz $(ROOT)$(imgdir)
+ 	$(INSTALL_DATA) $(topdir)/Squeak$(SQ_VERSION).changes.gz $(ROOT)$(imgdir)
+ 	$(LN_S) Squeak$(SQ_VERSION).image.gz $(ROOT)$(imgdir)/squeak.image.gz
+ 	$(LN_S) Squeak$(SQ_VERSION).changes.gz $(ROOT)$(imgdir)/squeak.changes.gz
+-	$(MKINSTALLDIRS) $(ROOT)$(bindir)
+-	( path=`$(cfgdir)/relpath $(bindir) $(imgdir)`; \
+-	  cd $(ROOT)$(bindir); \
+-	  rm -f inisqueak; \
+-	  $(LN_S) $$path/inisqueak .; )
+-
+ uninstall-image :
+ 	@$(UNINSTALL) $(ROOT)$(plgdir) Squeak$(SQ_VERSION).image.gz
+ 	@$(UNINSTALL) $(ROOT)$(plgdir) Squeak$(SQ_VERSION).changes.gz
+-	@$(UNINSTALL) $(ROOT)$(plgdir) inisqueak
+ 
+ # sources
+ 

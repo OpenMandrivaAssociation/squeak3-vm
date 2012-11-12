@@ -1,0 +1,12 @@
+diff -up Squeak-3.10-3/platforms/unix/config/inisqueak.in.tail-options Squeak-3.10-3/platforms/unix/config/inisqueak.in
+--- Squeak-3.10-3/platforms/unix/config/inisqueak.in.tail-options	2008-08-11 15:54:17.000000000 -0400
++++ Squeak-3.10-3/platforms/unix/config/inisqueak.in	2008-08-11 15:54:44.000000000 -0400
+@@ -182,7 +182,7 @@ if ${list}; then
+       echo
+     fi
+   done
+-  IMAGE=`echo ${images} | tr ' ' '\012' | tail +${reply} | head -1`
++  IMAGE=`echo ${images} | tr ' ' '\012' | tail -n +${reply} | head -1`
+   CHANGES=${IMAGE}.changes.gz
+   IMAGE=${IMAGE}.image.gz
+ fi

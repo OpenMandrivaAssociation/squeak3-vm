@@ -1,0 +1,9 @@
+--- Squeak-3.7-7/platforms/unix/config/make.prg.in.rpath	2005-10-22 13:48:04.000000000 +0200
++++ Squeak-3.7-7/platforms/unix/config/make.prg.in	2005-10-22 13:48:26.000000000 +0200
+@@ -11,5 +11,5 @@
+ 		  $(LDFLAGS) $(XLDFLAGS) -export-dynamic -c -o
+ LINK		= $(LIBTOOL) --mode=link \
+ 		  $(CC) $(CFLAGS) $(XCFLAGS) \
+-		  $(LDFLAGS) $(XLDFLAGS) -export-dynamic -R$(libdir) -o
++		  $(LDFLAGS) $(XLDFLAGS) -export-dynamic -o
+ RANLIB		= :

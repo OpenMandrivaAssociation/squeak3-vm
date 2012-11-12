@@ -1,0 +1,1990 @@
+--- Squeak-3.10-4/platforms/Cross/vm/sqNamedPrims.c.orig	2012-02-28 17:11:11.517168439 -0300
++++ Squeak-3.10-4/platforms/Cross/vm/sqNamedPrims.c	2012-02-28 17:11:16.177168877 -0300
+@@ -25,9 +25,9 @@ typedef struct {
+ #undef DEBUG
+ 
+ #ifdef DEBUG
+-#define dprintf(what) printf what
++#define Dprintf(what) printf what
+ #else
+-#define dprintf(what)
++#define Dprintf(what)
+ #endif
+ 
+ typedef struct ModuleEntry {
+@@ -98,12 +98,12 @@ static void *findExternalFunctionIn(char
+ {
+ 	void *result;
+ 
+-	dprintf(("Looking (externally) for %s in %s... ", functionName,module->name));
++	Dprintf(("Looking (externally) for %s in %s... ", functionName,module->name));
+ 	if(module->handle)
+ 		result = ioFindExternalFunctionIn(functionName, module->handle);
+ 	else
+ 		result = NULL;
+-	dprintf(("%s\n", result ? "found" : "not found"));
++	Dprintf(("%s\n", result ? "found" : "not found"));
+ 	return result;
+ }
+ 
+@@ -119,7 +119,7 @@ static void *findInternalFunctionIn(char
+   int listIndex, index;
+   sqExport *exports;
+ 
+-  dprintf(("Looking (internally) for %s in %s ... ", functionName, (pluginName ? pluginName : "<intrinsic>")));
++  Dprintf(("Looking (internally) for %s in %s ... ", functionName, (pluginName ? pluginName : "<intrinsic>")));
+ 
+   /* canonicalize functionName and pluginName to be NULL if not specified */
+   if(functionName && !functionName[0]) functionName = NULL;
+@@ -142,11 +142,11 @@ static void *findInternalFunctionIn(char
+       if(function && strcmp(functionName, function)) continue; /* name mismatch */
+ 
+       /* match */
+-      dprintf(("found\n"));
++      Dprintf(("found\n"));
+       return exports[index].primitiveAddress;
+     }
+   }
+-  dprintf(("not found\n"));
++  Dprintf(("not found\n"));
+   return NULL;
+ 
+ }
+@@ -184,35 +184,35 @@ static int callInitializersIn(ModuleEntr
+ 		/* Check the compiled name of the module */
+ 		moduleName = ((char* (*) (void))init0)();
+ 		if(!moduleName) {
+-			dprintf(("ERROR: getModuleName() returned NULL\n"));
++			Dprintf(("ERROR: getModuleName() returned NULL\n"));
+ 			return 0;
+ 		}
+ 		if(strncmp(moduleName, module->name, strlen(module->name)) != 0) {
+-			dprintf(("ERROR: getModuleName returned %s (expected: %s)\n", moduleName, module->name));
++			Dprintf(("ERROR: getModuleName returned %s (expected: %s)\n", moduleName, module->name));
+ 			return 0;
+ 		}
+ 	} else {
+ 		/* Note: older plugins may not export the compiled module name */
+-		dprintf(("WARNING: getModuleName() not found in %s\n", module->name));
++		Dprintf(("WARNING: getModuleName() not found in %s\n", module->name));
+ 	}
+ 	if(!init1) { 
+-		dprintf(("ERROR: setInterpreter() not found\n"));
++		Dprintf(("ERROR: setInterpreter() not found\n"));
+ 		return 0;
+ 	}
+ 	/* call setInterpreter */
+ 	okay = ((sqInt (*) (struct VirtualMachine*))init1)(sqGetInterpreterProxy());
+ 	if(!okay) {
+-		dprintf(("ERROR: setInterpreter() returned false\n"));
++		Dprintf(("ERROR: setInterpreter() returned false\n"));
+ 		return 0;
+ 	}
+ 	if(init2) {
+ 		okay = ((sqInt (*) (void)) init2)();
+ 		if(!okay) {
+-			dprintf(("ERROR: initialiseModule() returned false\n"));
++			Dprintf(("ERROR: initialiseModule() returned false\n"));
+ 			return 0;
+ 		}
+ 	}
+-	dprintf(("SUCCESS: Module %s is now initialized\n", module->name));
++	Dprintf(("SUCCESS: Module %s is now initialized\n", module->name));
+ 	return 1;
+ }
+ 
+@@ -231,7 +231,7 @@ static ModuleEntry *findAndLoadModule(ch
+ 	void *handle;
+ 	ModuleEntry *module;
+ 
+-	dprintf(("Looking for plugin %s\n", (pluginName ? pluginName : "<intrinsic>")));
++	Dprintf(("Looking for plugin %s\n", (pluginName ? pluginName : "<intrinsic>")));
+ 	/* Try to load the module externally */
+ 	handle = ioLoadModule(pluginName);
+ 	if(ffiLoad) {
+@@ -296,7 +296,7 @@ void *ioLoadFunctionFrom(char *functionN
+ 	module = findOrLoadModule(pluginName, 0);
+ 	if(!module) {
+ 		/* no module */
+-		dprintf(("Failed to find %s (module %s was not loaded)\n", functionName, pluginName));
++		Dprintf(("Failed to find %s (module %s was not loaded)\n", functionName, pluginName));
+ 		return 0;
+ 	}
+ 	if(!functionName) {
+--- Squeak-3.10-4/platforms/unix/plugins/MIDIPlugin/sqUnixMIDIALSA.inc.orig	2012-02-28 17:06:16.461164873 -0300
++++ Squeak-3.10-4/platforms/unix/plugins/MIDIPlugin/sqUnixMIDIALSA.inc	2012-02-28 17:06:28.718165016 -0300
+@@ -184,7 +184,7 @@ int sqMIDIClosePort(int portNum)
+ */
+ int sqMIDIGetClock(void)
+ {
+-  dprintf("sqMIDIGetClock\n");
++  Dprintf("sqMIDIGetClock\n");
+   success(false);
+   return 0;
+ }
+@@ -196,7 +196,7 @@ int sqMIDIGetClock(void)
+ */
+ int sqMIDIGetPortCount(void)
+ {
+-  dprintf("sqMIDIGetPortCount\n");
++  Dprintf("sqMIDIGetPortCount\n");
+   success(true);
+   return 1;
+ }
+@@ -244,7 +244,7 @@ int sqMIDIGetPortName(int portNum, int n
+ */
+ int sqMIDIOpenPort(int portNum, int readSemaIndex, int interfaceClockRate)
+ {
+-  dprintf("sqMIDIOpenPort(%d, %d, %d)\n", portNum, readSemaIndex, interfaceClockRate);
++  Dprintf("sqMIDIOpenPort(%d, %d, %d)\n", portNum, readSemaIndex, interfaceClockRate);
+   int type= SND_SEQ_PORT_TYPE_APPLICATION;
+ 
+   switch (portNum)
+@@ -406,7 +406,7 @@ int sqMIDIParameter(int whichParameter,
+ */
+ int sqMIDIPortReadInto(int portNum, int count, int bufferPtr)
+ {
+-  dprintf("sqMIDIPortRead\n");
++  Dprintf("sqMIDIPortRead\n");
+   success(false);
+   return 0;
+ }
+@@ -426,9 +426,9 @@ int sqMIDIPortWriteFromAt(int portNum, i
+       snd_seq_event_t ev;
+       unsigned char *bytePtr= (unsigned char *)bufferPtr;
+ 
+-      dprintf("Port %d Write:", portNum);
+-      for (i= 0;  i < count;  ++i) dprintf(" %d", (int)bytePtr[i]);
+-      dprintf(" at %d\n", time);
++      Dprintf("Port %d Write:", portNum);
++      for (i= 0;  i < count;  ++i) Dprintf(" %d", (int)bytePtr[i]);
++      Dprintf(" at %d\n", time);
+       
+       snd_seq_ev_clear(&ev);
+       snd_seq_ev_set_source(&ev, out_port);
+@@ -483,7 +483,7 @@ int sqMIDIParameterGet(int whichParamete
+ 
+ int midiShutdown(void)
+ {
+-  dprintf("midiShutdown\n");
++  Dprintf("midiShutdown\n");
+   success(false);
+   return 0;
+ }
+@@ -496,12 +496,12 @@ static void performMIDICmd(snd_seq_event
+   switch (cmd)
+     {
+     case 128:	/* note off */
+-      dprintf("Note off %d, %d\n", ch, arg1);
++      Dprintf("Note off %d, %d\n", ch, arg1);
+       snd_seq_ev_set_noteoff(ev, ch, arg1, 0);
+       break;
+ 
+     case 144:	/* note on */
+-      dprintf("Note on %d, %d, %d\n", ch, arg1, arg2);
++      Dprintf("Note on %d, %d, %d\n", ch, arg1, arg2);
+       snd_seq_ev_set_noteon(ev, ch, arg1, arg2);
+       break;
+ 
+--- Squeak-3.10-4/platforms/unix/plugins/PseudoTTYPlugin/sqUnixPseudoTTYPlugin.c.orig	2012-02-28 17:07:38.147165397 -0300
++++ Squeak-3.10-4/platforms/unix/plugins/PseudoTTYPlugin/sqUnixPseudoTTYPlugin.c	2012-02-28 17:07:42.668165492 -0300
+@@ -69,9 +69,9 @@
+ #include "openpty.h"		/* hide the gory details ;) */
+ 
+ #if 0
+-# define dprintf(ARGS) printf ARGS
++# define Dprintf(ARGS) printf ARGS
+ #else
+-# define dprintf(ARGS)
++# define Dprintf(ARGS)
+ #endif
+ 
+ 
+@@ -123,14 +123,14 @@ static void sigchld(int signum)
+       /* close(zombie->pty->fd); */
+       zombie->pty->rd.status= -2;
+       signalSemaphoreWithIndex(zombie->pty->sema);
+-      dprintf(("closed pty for pid %d\n", pid));
++      Dprintf(("closed pty for pid %d\n", pid));
+     }
+ }
+ 
+ 
+ int ptyInit(void)
+ {
+-  dprintf(("ptyInit: AsyncFileSession is %d\n", sqUnixAsyncFileSessionID));
++  Dprintf(("ptyInit: AsyncFileSession is %d\n", sqUnixAsyncFileSessionID));
+   vm= sqGetInterpreterProxy();
+   slaves= 0;
+   prevchld= signal(SIGCHLD, sigchld);
+@@ -185,7 +185,7 @@ int ptyForkAndExec(AsyncFile *f, int sem
+   char tty[32];
+   FilePtr fp= 0;
+ 
+-  dprintf(("ptyForkAndExec\n"));
++  Dprintf(("ptyForkAndExec\n"));
+ 
+   /* Module init must succeed in loading the AsyncFile plugin */
+   if (sqUnixAsyncFileSessionID == 0)
+@@ -194,14 +194,14 @@ int ptyForkAndExec(AsyncFile *f, int sem
+       return 0;
+     }
+ 
+-  dprintf(("AsyncFileSession is %d\n", sqUnixAsyncFileSessionID));
++  Dprintf(("AsyncFileSession is %d\n", sqUnixAsyncFileSessionID));
+ 
+   if (openpty(&ptm, &pts, tty, 0, 0) == -1)
+     {
+       perror("pty: openpty");
+       goto failDetached;
+     }
+-  dprintf(("pty: using %s (ptm %d pts %d)\n", tty, ptm, pts));
++  Dprintf(("pty: using %s (ptm %d pts %d)\n", tty, ptm, pts));
+ 
+   if ((fp= asyncFileAttach(f, ptm, semaIndex)) == 0)
+     goto failDetached;
+@@ -216,7 +216,7 @@ int ptyForkAndExec(AsyncFile *f, int sem
+ 
+     memcpy((void *)cmd, (void *)cmdIndex, cmdLen);
+     cmd[cmdLen]= '\0';
+-    dprintf(("pty: command: %s\n", cmd));
++    Dprintf(("pty: command: %s\n", cmd));
+     argv[0]= cmd;
+     for (i= 1;  i <= argLen;  ++i)
+       {
+@@ -225,12 +225,12 @@ int ptyForkAndExec(AsyncFile *f, int sem
+ 	int   len= 0;
+ 	if (!vm->isBytes(argOop)) goto fail;
+ 	len= vm->stSizeOf(argOop);
+-	dprintf(("pty: arg %d len %d\n", i, len));
++	Dprintf(("pty: arg %d len %d\n", i, len));
+ 	arg= (char *)alloca(len + 1);
+ 	memcpy((void *)arg, (void *)vm->firstIndexableField(argOop), len);
+ 	arg[len]= '\0';
+ 	argv[i]= arg;
+-	dprintf(("pty: argv[%d]: %s\n", i, argv[i]));
++	Dprintf(("pty: argv[%d]: %s\n", i, argv[i]));
+       }
+     argv[argLen+1]= 0;	/* argv terminator */
+ 
+@@ -284,14 +284,14 @@ int ptyClose(AsyncFile *f)
+   SlavePtr slave= 0, prev= 0;
+   FilePtr  pty= (FilePtr)f->state;
+   validate(f);
+-  dprintf(("pty: close %d\n", pty->fd));
++  Dprintf(("pty: close %d\n", pty->fd));
+   if (pty->fd >= 0)
+     {
+       for (prev= 0, slave= slaves;  slave;  prev= slave, slave= slave->next)
+ 	if (slave->pty == pty)
+ 	  {
+ 	    int pid= slave->pid;
+-	    dprintf(("killing pid %d connected to pts %d\n", pid, slave->pts));
++	    Dprintf(("killing pid %d connected to pts %d\n", pid, slave->pts));
+ 	    /* terminate with increasing degrees of violence... */
+ 	    kill(pid, SIGTERM);
+ 	    usleep(200*1000);
+@@ -319,7 +319,7 @@ ptyWindowSize(AsyncFile *f, int cols, in
+   struct winsize sz;
+   FilePtr pty= (FilePtr)f->state;
+   validate(f);
+-  dprintf(("pty %d size %d %d\n", pty->fd, cols, rows));
++  Dprintf(("pty %d size %d %d\n", pty->fd, cols, rows));
+   sz.ws_col= cols;
+   sz.ws_row= rows;
+   sz.ws_xpixel= sz.ws_ypixel= 0;
+--- Squeak-3.10-4/platforms/unix/plugins/SqueakFFIPrims/ffi-test.c.orig	2012-02-28 17:06:58.227164511 -0300
++++ Squeak-3.10-4/platforms/unix/plugins/SqueakFFIPrims/ffi-test.c	2012-02-28 17:07:03.682164801 -0300
+@@ -11,9 +11,9 @@
+ #endif
+ 
+ #if 0
+-# define dprintf(ARGS) printf ARGS
++# define Dprintf(ARGS) printf ARGS
+ #else
+-# define dprintf(ARGS)
++# define Dprintf(ARGS)
+ #endif
+ 
+ #include "ffi-test.h"
+@@ -21,84 +21,84 @@
+ 
+ char ffiTestChars(char c1, char c2, char c3, char c4)
+ {
+-  dprintf(("4 characters came in as\nc1 = %c (%x)\nc2 = %c (%x)\nc3 = %c (%x)\nc4 = %c (%x)\n", c1, c1, c2, c2, c3, c3, c4, c4));
++  Dprintf(("4 characters came in as\nc1 = %c (%x)\nc2 = %c (%x)\nc3 = %c (%x)\nc4 = %c (%x)\n", c1, c1, c2, c2, c3, c3, c4, c4));
+   return 'C';
+ }
+ 
+ 
+ short ffiTestShorts(short c1, short c2, short c3, short c4)
+ {
+-  dprintf(("4 shorts came in as\ns1 = %d (%x)\ns2 = %d (%x)\ns3 = %d (%x)\ns4 = %d (%x)\n", c1, c1, c2, c2, c3, c3, c4, c4));
++  Dprintf(("4 shorts came in as\ns1 = %d (%x)\ns2 = %d (%x)\ns3 = %d (%x)\ns4 = %d (%x)\n", c1, c1, c2, c2, c3, c3, c4, c4));
+   return -42;
+ }
+ 
+ 
+ int ffiTestInts(int c1, int c2, int c3, int c4)
+ {
+-  dprintf(("4 ints came in as\ni1 = %d (%x)\ni2 = %d (%x)\ni3 = %d (%x)\ni4 = %d (%x)\n", c1, c1, c2, c2, c3, c3, c4, c4));
++  Dprintf(("4 ints came in as\ni1 = %d (%x)\ni2 = %d (%x)\ni3 = %d (%x)\ni4 = %d (%x)\n", c1, c1, c2, c2, c3, c3, c4, c4));
+   return 42;
+ }
+ 
+ 
+ int ffiTestInts8(int c1, int c2, int c3, int c4, int c5, int c6, int c7, int c8)
+ {
+-  dprintf(("4 ints came in as\ni1 = %d (%x)\ni2 = %d (%x)\ni3 = %d (%x)\ni4 = %d (%x)\ni5 = %d (%x)\ni6 = %d (%x)\ni7 = %d (%x)\ni8 = %d (%x)\n", c1, c1, c2, c2, c3, c3, c4, c4, c5, c5, c6, c6, c7, c7, c8, c8));
++  Dprintf(("4 ints came in as\ni1 = %d (%x)\ni2 = %d (%x)\ni3 = %d (%x)\ni4 = %d (%x)\ni5 = %d (%x)\ni6 = %d (%x)\ni7 = %d (%x)\ni8 = %d (%x)\n", c1, c1, c2, c2, c3, c3, c4, c4, c5, c5, c6, c6, c7, c7, c8, c8));
+   return 42;
+ }
+ 
+ 
+ int ffiTestInts9(int c1, int c2, int c3, int c4, int c5, int c6, int c7, int c8, int c9)
+ {
+-  dprintf(("4 ints came in as\ni1 = %d (%x)\ni2 = %d (%x)\ni3 = %d (%x)\ni4 = %d (%x)\ni5 = %d (%x)\ni6 = %d (%x)\ni7 = %d (%x)\ni8 = %d (%x)\ni9 = %d (%x)\n", c1, c1, c2, c2, c3, c3, c4, c4, c5, c5, c6, c6, c7, c7, c8, c8, c9, c9));
++  Dprintf(("4 ints came in as\ni1 = %d (%x)\ni2 = %d (%x)\ni3 = %d (%x)\ni4 = %d (%x)\ni5 = %d (%x)\ni6 = %d (%x)\ni7 = %d (%x)\ni8 = %d (%x)\ni9 = %d (%x)\n", c1, c1, c2, c2, c3, c3, c4, c4, c5, c5, c6, c6, c7, c7, c8, c8, c9, c9));
+   return 42;
+ }
+ 
+ 
+ float ffiTestFloats(float f1, float f2)
+ {
+-  dprintf(("The two floats are %f and %f\n", (double)f1, (double)f2));
++  Dprintf(("The two floats are %f and %f\n", (double)f1, (double)f2));
+   return (float) (f1 + f2);
+ }
+ 
+ 
+ float ffiTestFloats7(float f1, float f2, float f3, float f4, float f5, float f6, float f7)
+ {
+-  dprintf(("The 7 floats are %f %f %f %f %f %f %f\n", (double)f1, (double)f2, (double)f3, (double)f4, (double)f5, (double)f6, (double)f7));
++  Dprintf(("The 7 floats are %f %f %f %f %f %f %f\n", (double)f1, (double)f2, (double)f3, (double)f4, (double)f5, (double)f6, (double)f7));
+   return (float) (f1 + f2 + f3 + f4 + f5 + f6 + f7);
+ }
+ 
+ 
+ float ffiTestFloats13(float f1, float f2, float f3, float f4, float f5, float f6, float f7, float f8, float f9, float f10, float f11, float f12, float f13)
+ {
+-  dprintf(("The 13 floats are %f %f %f %f %f %f %f %f %f %f %f %f %f\n", (double)f1, (double)f2, (double)f3, (double)f4, (double)f5, (double)f6, (double)f7, (double)f8, (double)f9, (double)f10, (double)f11, (double)f12, (double)f13));
++  Dprintf(("The 13 floats are %f %f %f %f %f %f %f %f %f %f %f %f %f\n", (double)f1, (double)f2, (double)f3, (double)f4, (double)f5, (double)f6, (double)f7, (double)f8, (double)f9, (double)f10, (double)f11, (double)f12, (double)f13));
+   return (float) (f1 + f2 + f3 + f4 + f5 + f6 + f7 + f8 + f9 + f10 + f11 + f12 + f13);
+ }
+ 
+ 
+ float ffiTestFloats15(float f1, float f2, float f3, float f4, float f5, float f6, float f7, float f8, float f9, float f10, float f11, float f12, float f13, float f14, float f15)
+ {
+-  dprintf(("The 15 floats are %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f\n", (double)f1, (double)f2, (double)f3, (double)f4, (double)f5, (double)f6, (double)f7, (double)f8, (double)f9, (double)f10, (double)f11, (double)f12, (double)f13, (double)f14, (double)f15));
++  Dprintf(("The 15 floats are %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f\n", (double)f1, (double)f2, (double)f3, (double)f4, (double)f5, (double)f6, (double)f7, (double)f8, (double)f9, (double)f10, (double)f11, (double)f12, (double)f13, (double)f14, (double)f15));
+   return (float) (f1 + f2 + f3 + f4 + f5 + f6 + f7 + f8 + f9 + f10 + f11 + f12 + f13 + f14 + f15);
+ }
+ 
+ 
+ double ffiTestDoubles(double d1, double d2)
+ {
+-  dprintf(("The two doubles are %f and %f\n", d1, d2));
++  Dprintf(("The two doubles are %f and %f\n", d1, d2));
+   return d1+d2;
+ }
+ 
+ 
+ double ffiTestDoubles15(double f1, double f2, double f3, double f4, double f5, double f6, double f7, double f8, double f9, double f10, double f11, double f12, double f13, double f14, double f15)
+ {
+-  dprintf(("The 15 doubles are %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f\n", f1, f2, f3, f4, f5, f6, f7, f8, f9, f10, f11, f12, f13, f14, f15));
++  Dprintf(("The 15 doubles are %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f\n", f1, f2, f3, f4, f5, f6, f7, f8, f9, f10, f11, f12, f13, f14, f15));
+   return (double) (f1 + f2 + f3 + f4 + f5 + f6 + f7 + f8 + f9 + f10 + f11 + f12 + f13 + f14 + f15);
+ }
+ 
+ 
+ char *ffiPrintString(char *string)
+ {
+-  dprintf(("%s\n", string));
++  Dprintf(("%s\n", string));
+   return string;
+ }
+ 
+@@ -106,7 +106,7 @@ char *ffiPrintString(char *string)
+ ffiTestPoint2 ffiTestStruct64(ffiTestPoint2 pt1, ffiTestPoint2 pt2)
+ {
+   ffiTestPoint2 result;
+-  dprintf(("pt1.x = %d\npt1.y = %d\npt2.x = %d\npt2.y = %d\n",
++  Dprintf(("pt1.x = %d\npt1.y = %d\npt2.x = %d\npt2.y = %d\n",
+ 	 pt1.x, pt1.y, pt2.x, pt2.y));
+   result.x = pt1.x + pt2.x;
+   result.y = pt1.y + pt2.y;
+@@ -117,9 +117,9 @@ ffiTestPoint2 ffiTestStruct64(ffiTestPoi
+ ffiTestPoint4 ffiTestStructBig(ffiTestPoint4 pt1, ffiTestPoint4 pt2)
+ {
+   ffiTestPoint4 result;
+-  dprintf(("pt1.x = %d\npt1.y = %d\npt1.z = %d\npt1.w = %d\n",
++  Dprintf(("pt1.x = %d\npt1.y = %d\npt1.z = %d\npt1.w = %d\n",
+ 	 pt1.x, pt1.y, pt1.z, pt1.w));
+-  dprintf(("pt2.x = %d\npt2.y = %d\npt2.z = %d\npt2.w = %d\n",
++  Dprintf(("pt2.x = %d\npt2.y = %d\npt2.z = %d\npt2.w = %d\n",
+ 	 pt2.x, pt2.y, pt2.z, pt2.w));
+   result.x = pt1.x + pt2.x;
+   result.y = pt1.y + pt2.y;
+@@ -132,9 +132,9 @@ ffiTestPoint4 ffiTestStructBig(ffiTestPo
+ ffiTestPoint4 *ffiTestPointers(ffiTestPoint4 *pt1, ffiTestPoint4 *pt2)
+ {
+   ffiTestPoint4 *result;
+-  dprintf(("pt1.x = %d\npt1.y = %d\npt1.z = %d\npt1.w = %d\n",
++  Dprintf(("pt1.x = %d\npt1.y = %d\npt1.z = %d\npt1.w = %d\n",
+ 	 pt1->x, pt1->y, pt1->z, pt1->w));
+-  dprintf(("pt2.x = %d\npt2.y = %d\npt2.z = %d\npt2.w = %d\n",
++  Dprintf(("pt2.x = %d\npt2.y = %d\npt2.z = %d\npt2.w = %d\n",
+ 	 pt2->x, pt2->y, pt2->z, pt2->w));
+   result = (ffiTestPoint4*) malloc(sizeof(ffiTestPoint4));
+   result->x = pt1->x + pt2->x;
+@@ -147,7 +147,7 @@ ffiTestPoint4 *ffiTestPointers(ffiTestPo
+ 
+ LONGLONG ffiTestLongLong(LONGLONG i1, LONGLONG i2)
+ {
+-  dprintf(("longlong %lld %lld\n", i1, i2));
++  Dprintf(("longlong %lld %lld\n", i1, i2));
+   return i1 + i2;
+ }
+ 
+--- Squeak-3.10-4/platforms/unix/plugins/SqueakFFIPrims/ffi-test-main.c.orig	2012-02-28 17:07:21.811165123 -0300
++++ Squeak-3.10-4/platforms/unix/plugins/SqueakFFIPrims/ffi-test-main.c	2012-02-28 17:07:25.935165354 -0300
+@@ -34,10 +34,10 @@
+ #include "sqFFI.h"
+ 
+ #if 0
+-# define dprintf(ARGS)	printf ARGS
++# define Dprintf(ARGS)	printf ARGS
+ # define puts(ARG)	puts(ARG)
+ #else
+-# define dprintf(ARGS)
++# define Dprintf(ARGS)
+ # define puts(ARG)
+ #endif
+ 
+@@ -78,14 +78,14 @@ static long long return_ll(long long ll)
+ static int floating(int a, float b, double c, long_double d, int e)
+ {
+   int i;
+-  dprintf(("%d %f %f %"Lf" %d\n", a, (double)b, c, d, e));
++  Dprintf(("%d %f %f %"Lf" %d\n", a, (double)b, c, d, e));
+   i= (int)((float)a/b + ((float)c/(float)d));
+   return i;
+ }
+ 
+ static float many(float f1, float f2, float f3, float f4, float f5, float f6, float f7, float f8, float f9, float f10, float f11, float f12, float f13, float f14, float f15)
+ {
+-  dprintf(("%f %f %f %f %f %f %f %f %f %f %f %f %f %f %f\n",
++  Dprintf(("%f %f %f %f %f %f %f %f %f %f %f %f %f %f %f\n",
+ 	 (double)f1, (double)f2, (double)f3, (double)f4, (double)f5, 
+ 	 (double)f6, (double)f7, (double)f8, (double)f9, (double)f10,
+ 	 (double)f11, (double)f12, (double)f13, (double)f14, (double)f15));
+@@ -107,7 +107,7 @@ static int spec_structure_1[]= {
+ 
+ static test_structure_1 struct1(test_structure_1 ts)
+ {
+-  dprintf(("%d %f %d\n", ts.uc, ts.d, ts.ui));
++  Dprintf(("%d %f %d\n", ts.uc, ts.d, ts.ui));
+   ts.uc++;  ts.d--;  ts.ui++;  return ts;
+ }
+ 
+@@ -156,7 +156,7 @@ static int spec_structure_5[]= {
+ 
+ static test_structure_5 struct5(test_structure_5 ts1, test_structure_5 ts2)
+ {
+-  dprintf(("%d %d %d %d\n", ts1.c1, ts1.c2, ts2.c1, ts2.c2));
++  Dprintf(("%d %d %d %d\n", ts1.c1, ts1.c2, ts2.c1, ts2.c2));
+   ts1.c1 += ts2.c1;  ts1.c2 -= ts2.c2; return ts1;
+ }
+ 
+@@ -236,7 +236,7 @@ void ctests(void)
+ 	GO(FFITypeSignedLongLong, return_ll);
+ 	rll= ffiLongLongResultHigh() * 0x100000000LL + ffiLongLongResultLow();
+ 	ffiCleanup();
+-	dprintf(("%lld %lld\n", ll, rll));
++	Dprintf(("%lld %lld\n", ll, rll));
+ 	CHECK(rll == ll);
+       }
+ 
+@@ -277,14 +277,14 @@ void ctests(void)
+     float f= 3.14159;
+     long_double ld;
+ 
+-    dprintf(("%"Lf"\n", ldblit(f)));
++    Dprintf(("%"Lf"\n", ldblit(f)));
+     ld= 666;
+     ffiInitialize();
+     ffiPushSingleFloat(f);
+     GO(FFITypeDoubleFloat, ldblit);
+     ld= ffiReturnFloatValue();
+     ffiCleanup();
+-    dprintf(("%"Lf", %"Lf", %"Lf", %"Lf"\n", ld, ldblit(f), ld - ldblit(f), (long_double)LDBL_EPSILON));
++    Dprintf(("%"Lf", %"Lf", %"Lf", %"Lf"\n", ld, ldblit(f), ld - ldblit(f), (long_double)LDBL_EPSILON));
+     /* These are not always the same!! Check for a reasonable delta */
+     CHECK(ld - ldblit(f) < LDBL_EPSILON);
+   }
+@@ -305,7 +305,7 @@ void ctests(void)
+     ffiPushSignedInt(si2);
+     rint= GO(FFITypeSignedInt, floating);
+     ffiCleanup();
+-    dprintf(("%d vs %d\n", (int)rint, floating(si1, f, d, ld, si2)));
++    Dprintf(("%d vs %d\n", (int)rint, floating(si1, f, d, ld, si2)));
+     CHECK(rint == floating(si1, f, d, ld, si2));
+   }
+   puts("double return tests...");
+@@ -395,7 +395,7 @@ void ctests(void)
+     GOS(structure_1, struct1);
+     ffiStoreStructure((int)&ts1_result, sizeof(ts1_result));
+     ffiCleanup();
+-    dprintf(("%d %g\n", ts1_result.ui, ts1_result.d));
++    Dprintf(("%d %g\n", ts1_result.ui, ts1_result.d));
+     CHECK(ts1_result.ui == 556);
+     CHECK(ts1_result.d == 3.14159 - 1);
+   }
+@@ -403,16 +403,16 @@ void ctests(void)
+     test_structure_2 ts2_arg, ts2_result;
+     ts2_arg.d1= 5.55;
+     ts2_arg.d2= 6.66;
+-    dprintf(("%g\n", ts2_result.d1));	/*xxx this is junk!*/
+-    dprintf(("%g\n", ts2_result.d2));
++    Dprintf(("%g\n", ts2_result.d1));	/*xxx this is junk!*/
++    Dprintf(("%g\n", ts2_result.d2));
+     ffiInitialize();
+     CHECK(ffiCanReturn(SPEC(structure_2)));
+     ffiPushStructureOfLength((int)&ts2_arg, SPEC(structure_2));
+     GOS(structure_2, struct2);
+     ffiStoreStructure((int)&ts2_result, sizeof(ts2_result));
+     ffiCleanup();
+-    dprintf(("%g\n", ts2_result.d1));
+-    dprintf(("%g\n", ts2_result.d2));
++    Dprintf(("%g\n", ts2_result.d1));
++    Dprintf(("%g\n", ts2_result.d2));
+     CHECK(ts2_result.d1 == 5.55 - 1);
+     CHECK(ts2_result.d2 == 6.66 - 1);
+   }
+@@ -427,7 +427,7 @@ void ctests(void)
+     GOS(structure_3, struct3);
+     ffiStoreStructure((int)&ts3_result, sizeof(ts3_result));
+     ffiCleanup();
+-    dprintf(("%d %d\n", ts3_result.si, -(compare_value*2)));
++    Dprintf(("%d %d\n", ts3_result.si, -(compare_value*2)));
+     CHECK(ts3_result.si == -(ts3_arg.si*2));
+   }
+   {
+@@ -461,23 +461,23 @@ void ctests(void)
+     GOS(structure_5, struct5);
+     ffiStoreStructure((int)&ts5_result, sizeof(ts5_result));
+     ffiCleanup();
+-    dprintf(("%d %d\n", ts5_result.c1, ts5_result.c2));
++    Dprintf(("%d %d\n", ts5_result.c1, ts5_result.c2));
+     CHECK(ts5_result.c1 == 7 && ts5_result.c2 == 3);
+   }
+   {
+     test_structure_6 ts6_arg, ts6_result;
+     ts6_arg.f= 5.55f;
+     ts6_arg.d= 6.66;
+-    dprintf(("%g\n", ts6_arg.f));
+-    dprintf(("%g\n", ts6_arg.d));
++    Dprintf(("%g\n", ts6_arg.f));
++    Dprintf(("%g\n", ts6_arg.d));
+     ffiInitialize();
+     CHECK(ffiCanReturn(SPEC(structure_6)));
+     ffiPushStructureOfLength((int)&ts6_arg, SPEC(structure_6));
+     GOS(structure_6, struct6);
+     ffiStoreStructure((int)&ts6_result, sizeof(ts6_result));
+     ffiCleanup();
+-    dprintf(("%g\n", ts6_result.f));
+-    dprintf(("%g\n", ts6_result.d));
++    Dprintf(("%g\n", ts6_result.f));
++    Dprintf(("%g\n", ts6_result.d));
+     CHECK(ts6_result.f == 5.55f + 1);
+     CHECK(ts6_result.d == 6.66 + 1);
+   }
+@@ -486,18 +486,18 @@ void ctests(void)
+     ts7_arg.f1= 5.55f;
+     ts7_arg.f2= 55.5f;
+     ts7_arg.d= 6.66;
+-    dprintf(("%g\n", ts7_arg.f1));
+-    dprintf(("%g\n", ts7_arg.f2));
+-    dprintf(("%g\n", ts7_arg.d));
++    Dprintf(("%g\n", ts7_arg.f1));
++    Dprintf(("%g\n", ts7_arg.f2));
++    Dprintf(("%g\n", ts7_arg.d));
+     ffiInitialize();
+     CHECK(ffiCanReturn(SPEC(structure_7)));
+     ffiPushStructureOfLength((int)&ts7_arg, SPEC(structure_7));
+     GOS(structure_7, struct7);
+     ffiStoreStructure((int)&ts7_result, sizeof(ts7_result));
+     ffiCleanup();
+-    dprintf(("%g\n", ts7_result.f1));
+-    dprintf(("%g\n", ts7_result.f2));
+-    dprintf(("%g\n", ts7_result.d));
++    Dprintf(("%g\n", ts7_result.f1));
++    Dprintf(("%g\n", ts7_result.f2));
++    Dprintf(("%g\n", ts7_result.d));
+     CHECK(ts7_result.f1 == 5.55f + 1);
+     CHECK(ts7_result.f2 == 55.5f + 1);
+     CHECK(ts7_result.d == 6.66 + 1);
+@@ -508,20 +508,20 @@ void ctests(void)
+     ts8_arg.f2= 55.5f;
+     ts8_arg.f3= -5.55f;
+     ts8_arg.f4= -55.5f;
+-    dprintf(("%g\n", ts8_arg.f1));
+-    dprintf(("%g\n", ts8_arg.f2));
+-    dprintf(("%g\n", ts8_arg.f3));
+-    dprintf(("%g\n", ts8_arg.f4));
++    Dprintf(("%g\n", ts8_arg.f1));
++    Dprintf(("%g\n", ts8_arg.f2));
++    Dprintf(("%g\n", ts8_arg.f3));
++    Dprintf(("%g\n", ts8_arg.f4));
+     ffiInitialize();
+     CHECK(ffiCanReturn(SPEC(structure_8)));
+     ffiPushStructureOfLength((int)&ts8_arg, SPEC(structure_8));
+     GOS(structure_8, struct8);
+     ffiStoreStructure((int)&ts8_result, sizeof(ts8_result));
+     ffiCleanup();
+-    dprintf(("%g\n", ts8_result.f1));
+-    dprintf(("%g\n", ts8_result.f2));
+-    dprintf(("%g\n", ts8_result.f3));
+-    dprintf(("%g\n", ts8_result.f4));
++    Dprintf(("%g\n", ts8_result.f1));
++    Dprintf(("%g\n", ts8_result.f2));
++    Dprintf(("%g\n", ts8_result.f3));
++    Dprintf(("%g\n", ts8_result.f4));
+     CHECK(ts8_result.f1 == 5.55f + 1);
+     CHECK(ts8_result.f2 == 55.5f + 1);
+     CHECK(ts8_result.f3 == -5.55f + 1);
+@@ -531,8 +531,8 @@ void ctests(void)
+     test_structure_9 ts9_arg, ts9_result;
+     ts9_arg.f= 5.55f;
+     ts9_arg.i= 5;
+-    dprintf(("%g\n", ts9_arg.f));
+-    dprintf(("%d\n", ts9_arg.i));
++    Dprintf(("%g\n", ts9_arg.f));
++    Dprintf(("%d\n", ts9_arg.i));
+ 
+     ffiInitialize();
+     CHECK(ffiCanReturn(SPEC(structure_9)));
+@@ -540,8 +540,8 @@ void ctests(void)
+     GOS(structure_9, struct9);
+     ffiStoreStructure((int)&ts9_result, sizeof(ts9_result));
+     ffiCleanup();
+-    dprintf(("%g\n", ts9_result.f));
+-    dprintf(("%d\n", ts9_result.i));
++    Dprintf(("%g\n", ts9_result.f));
++    Dprintf(("%d\n", ts9_result.i));
+     CHECK(ts9_result.f == 5.55f + 1);
+     CHECK(ts9_result.i == 5 + 1);
+   }
+@@ -587,7 +587,7 @@ void stests(void)
+   GO(FFITypeSingleFloat, ffiTestFloats);
+   d= ffiReturnFloatValue();
+   ffiCleanup();
+-  dprintf(("%f\n", d));
++  Dprintf(("%f\n", d));
+   assert(d == 130.0, "single floats don't work");
+ 
+   ffiInitialize(); D(41.0L); D(1);
+--- Squeak-3.10-4/platforms/unix/plugins/SqueakFFIPrims/x86-sysv.c.orig	2012-02-28 17:06:38.586164497 -0300
++++ Squeak-3.10-4/platforms/unix/plugins/SqueakFFIPrims/x86-sysv.c	2012-02-28 17:06:46.725164589 -0300
+@@ -45,9 +45,9 @@
+ #endif
+ 
+ #if 0
+-# define dprintf(ARGS)printf ARGS
++# define Dprintf(ARGS)printf ARGS
+ #else
+-# define dprintf(ARGS)
++# define Dprintf(ARGS)
+ #endif
+ 
+ #if defined(FFI_TEST)
+@@ -132,63 +132,63 @@ int ffiCanReturn(int *structSpec, int sp
+ 
+ int ffiPushSignedChar(int value)
+ { 
+-  dprintf(("ffiPushSignedChar %d\n", value));
++  Dprintf(("ffiPushSignedChar %d\n", value));
+   pushInt(value);
+   return 1; 
+ }
+ 
+ int ffiPushUnsignedChar(int value)
+ { 
+-  dprintf(("ffiPushUnsignedChar %d\n", value));
++  Dprintf(("ffiPushUnsignedChar %d\n", value));
+   pushInt(value);
+   return 1; 
+ }
+ 
+ int ffiPushSignedByte(int value)
+ { 
+-  dprintf(("ffiPushSignedByte %d\n", value));
++  Dprintf(("ffiPushSignedByte %d\n", value));
+   pushInt(value);
+   return 1; 
+ }
+ 
+ int ffiPushUnsignedByte(int value)
+ { 
+-  dprintf(("ffiPushUnsignedByte %d\n", value));
++  Dprintf(("ffiPushUnsignedByte %d\n", value));
+   pushInt(value);
+   return 1; 
+ }
+ 
+ int ffiPushSignedShort(int value)
+ { 
+-  dprintf(("ffiPushSignedShort %d\n", value));
++  Dprintf(("ffiPushSignedShort %d\n", value));
+   pushInt(value);
+   return 1; 
+ }
+ 
+ int ffiPushUnsignedShort(int value)
+ { 
+-  dprintf(("ffiPushUnsignedShort %d\n", value));
++  Dprintf(("ffiPushUnsignedShort %d\n", value));
+   pushInt(value);
+   return 1; 
+ }
+ 
+ int ffiPushSignedInt(int value)
+ { 
+-  dprintf(("ffiPushSignedInt %d\n", value));
++  Dprintf(("ffiPushSignedInt %d\n", value));
+   pushInt(value);
+   return 1; 
+ }
+ 
+ int ffiPushUnsignedInt(int value)
+ { 
+-  dprintf(("ffiPushUnsignedInt %d\n", value));
++  Dprintf(("ffiPushUnsignedInt %d\n", value));
+   pushInt(value);
+   return 1; 
+ }
+ 
+ int ffiPushSignedLongLong(int low, int high)
+ { 
+-  dprintf(("ffiPushSignedLongLong %d %d\n", low, high));
++  Dprintf(("ffiPushSignedLongLong %d %d\n", low, high));
+   pushInt(low);
+   pushInt(high);
+   return 1; 
+@@ -196,7 +196,7 @@ int ffiPushSignedLongLong(int low, int h
+ 
+ int ffiPushUnsignedLongLong(int low, int high)
+ { 
+-  dprintf(("ffiPushUnsignedLongLong %d %d\n", low, high));
++  Dprintf(("ffiPushUnsignedLongLong %d %d\n", low, high));
+   pushInt(low);
+   pushInt(high);
+   return 1; 
+@@ -204,7 +204,7 @@ int ffiPushUnsignedLongLong(int low, int
+ 
+ int ffiPushPointer(int pointer)
+ { 
+-  dprintf(("ffiPushPointer %d\n", pointer));
++  Dprintf(("ffiPushPointer %d\n", pointer));
+   pushInt(pointer);
+   return 1; 
+ }
+@@ -212,14 +212,14 @@ int ffiPushPointer(int pointer)
+ int ffiPushSingleFloat(double value)
+ { 
+   float f= (float)value;
+-  dprintf(("ffiPushSingleFloat %f\n", value));
++  Dprintf(("ffiPushSingleFloat %f\n", value));
+   pushInt(*(int *)&f);
+   return 1; 
+ }
+ 
+ int ffiPushDoubleFloat(double value)
+ { 
+-  dprintf(("ffiPushDoubleFloat %f\n", value));
++  Dprintf(("ffiPushDoubleFloat %f\n", value));
+   pushInt(((int *)&value)[0]);
+   pushInt(((int *)&value)[1]);
+   return 1; 
+@@ -228,12 +228,12 @@ int ffiPushDoubleFloat(double value)
+ int ffiPushStringOfLength(int srcIndex, int length)
+ {
+   char *ptr;
+-  dprintf(("ffiPushStringOfLength %d\n", length));
++  Dprintf(("ffiPushStringOfLength %d\n", length));
+   checkStack();
+   ptr= (char *)malloc(length + 1);
+   if (!ptr)
+     return primitiveFail();
+-  dprintf(("  ++ alloc string\n"));
++  Dprintf(("  ++ alloc string\n"));
+   memcpy(ptr, (void *)srcIndex, length);
+   ptr[length]= '\0';
+   ffiTempStrings[ffiTempStringCount++]= ptr;
+@@ -245,7 +245,7 @@ int ffiPushStructureOfLength(int pointer
+ {
+   int lbs= *structSpec & FFIStructSizeMask;
+   int size= (lbs + sizeof(int) - 1) / sizeof(int);
+-  dprintf(("ffiPushStructureOfLength %d (%db %dw)\n", specSize, lbs, size));
++  Dprintf(("ffiPushStructureOfLength %d (%db %dw)\n", specSize, lbs, size));
+   if (ffiStackIndex + size > FFI_MAX_STACK)
+     return primitiveFail();
+   memcpy((void *)(ffiStack + ffiStackIndex), (void *)pointer, lbs);
+@@ -261,7 +261,7 @@ int	ffiLongLongResultHigh(void)	{ return
+ 
+ int ffiStoreStructure(int address, int structSize)
+ {
+-  dprintf(("ffiStoreStructure %d %d\n", address, structSize));
++  Dprintf(("ffiStoreStructure %d %d\n", address, structSize));
+   memcpy((void *)address, (ffiStructReturnValue
+ 			   ? (void *)ffiStructReturnValue
+ 			   : (void *)&ffiIntReturnValue),
+@@ -273,16 +273,16 @@ int ffiStoreStructure(int address, int s
+ int ffiCleanup(void)
+ {
+   int i;
+-  dprintf(("ffiCleanup\n"));
++  Dprintf(("ffiCleanup\n"));
+   for (i= 0;  i < ffiTempStringCount;  ++i)
+     {
+-      dprintf(("  ++ free string\n"));
++      Dprintf(("  ++ free string\n"));
+       free(ffiTempStrings[i]);
+     }
+   ffiTempStringCount= 0;
+   if (ffiStructReturnValue)
+     {
+-      dprintf(("  ++ free struct\n"));
++      Dprintf(("  ++ free struct\n"));
+       free(ffiStructReturnValue);
+       ffiStructReturnValue= 0;
+     }
+--- Squeak-3.10-4/platforms/unix/vm/debug.h.orig	2012-02-28 17:09:09.291168069 -0300
++++ Squeak-3.10-4/platforms/unix/vm/debug.h	2012-02-28 17:09:13.849167564 -0300
+@@ -13,9 +13,9 @@
+   ** the preprocessor just to implement precomp?  good _grief_.
+   */
+   extern void __sq_dprintf(const char *fmt, ...);
+-# define dprintf(ARGS) __sq_dprintf ARGS
++# define Dprintf(ARGS) __sq_dprintf ARGS
+ #else
+-# define dprintf(ARGS)	((void)0)
++# define Dprintf(ARGS)	((void)0)
+ #endif
+ 
+ 
+--- Squeak-3.10-4/platforms/unix/vm-display-fbdev/sqUnixFBDev.c.orig	2012-02-28 17:10:10.909168037 -0300
++++ Squeak-3.10-4/platforms/unix/vm-display-fbdev/sqUnixFBDev.c	2012-02-28 17:10:15.462168143 -0300
+@@ -68,7 +68,7 @@
+ #endif
+ 
+ 
+-static void dprintf(const char *fmt, ...)
++static void Dprintf(const char *fmt, ...)
+ {
+ #if (DEBUG)
+   va_list ap;
+@@ -149,7 +149,7 @@ static void closeFramebuffer(void)
+ 
+ static void enqueueKeyboardEvent(int key, int up, int modifiers)
+ {
+-  dprintf("KEY %3d %02x %c %s mod %02x\n",
++  Dprintf("KEY %3d %02x %c %s mod %02x\n",
+ 	  key, key, ((key > 32) && (key < 127)) ? key : ' ',
+ 	  up ? "UP" : "DOWN", modifiers);
+ 
+@@ -190,7 +190,7 @@ static void enqueueMouseEvent(int b, int
+   buttonState= b;
+   mousePosition= fb->cursorPosition;
+   if (b)
+-    dprintf("mouse %02x at %4d,%4d mod %02x\n",
++    Dprintf("mouse %02x at %4d,%4d mod %02x\n",
+ 	    b, mousePosition.x, mousePosition.y, modifierState);
+   recordMouseEvent();
+ }
+@@ -275,14 +275,14 @@ static sqInt display_ioShowDisplay(sqInt
+ 
+ static sqInt display_ioHasDisplayDepth(sqInt i)
+ {
+-  dprintf("hasDisplayDepth %d (%d) => %d\n", i, fb_depth(fb), (i == fb_depth(fb)));
++  Dprintf("hasDisplayDepth %d (%d) => %d\n", i, fb_depth(fb), (i == fb_depth(fb)));
+   return (i == fb_depth(fb));
+ }
+ 
+ 
+ static void openDisplay(void)
+ {
+-  dprintf("openDisplay\n");
++  Dprintf("openDisplay\n");
+   openMouse();
+   openKeyboard();
+   openFramebuffer();
+@@ -294,7 +294,7 @@ static void openDisplay(void)
+ 
+ static void closeDisplay(void)
+ {
+-  dprintf("closeDisplay\n");
++  Dprintf("closeDisplay\n");
+   closeFramebuffer();
+   closeKeyboard();
+   closeMouse();
+--- Squeak-3.10-4/platforms/unix/vm-display-fbdev/sqUnixFBDevFramebuffer.c.orig	2012-02-28 17:10:49.257169245 -0300
++++ Squeak-3.10-4/platforms/unix/vm-display-fbdev/sqUnixFBDevFramebuffer.c	2012-02-28 17:10:53.364168610 -0300
+@@ -508,7 +508,7 @@ static void fb_initVisual(_self)
+   self->size= fb_height(self) * self->fix.line_length;
+   self->pitch= self->fix.line_length / self->var.bits_per_pixel * 8;
+ 
+-  dprintf("%s: %dx%dx%d+%x+%x (%dx%d) %s, rgb %d+%d %d+%d %d+%d pitch %d(%d)\n", self->fbName,
++  Dprintf("%s: %dx%dx%d+%x+%x (%dx%d) %s, rgb %d+%d %d+%d %d+%d pitch %d(%d)\n", self->fbName,
+ 	  self->var.xres, self->var.yres, self->var.bits_per_pixel, self->var.xoffset, self->var.yoffset,
+ 	  self->var.xres_virtual, self->var.yres_virtual,
+ 	  visualName(self),
+@@ -607,7 +607,7 @@ static void fb_initBuffer(_self)
+   assert(self->addr == 0);
+   self->addr= (char *)mmap(0, self->size, PROT_READ | PROT_WRITE, MAP_SHARED, self->fd, 0);
+   if (self->addr == (char *)MAP_FAILED) fatalError("mmap");
+-  dprintf("%s: mapped at %p + %ld\n", self->fbName, self->addr, self->size);
++  Dprintf("%s: mapped at %p + %ld\n", self->fbName, self->addr, self->size);
+ }
+ 
+ 
+@@ -617,7 +617,7 @@ static void fb_freeBuffer(_self)
+     {
+       munmap(self->addr, self->size);
+       self->addr= 0;
+-      dprintf("%s: unmapped\n", self->fbName);
++      Dprintf("%s: unmapped\n", self->fbName);
+     }
+ }
+ 
+@@ -674,7 +674,7 @@ static int fb_open(_self, struct kb *kb,
+ 
+   self->kb= kb;
+ 
+-  dprintf("using: %s (%d)\n", self->fbName, self->fd);
++  Dprintf("using: %s (%d)\n", self->fbName, self->fd);
+ 
+   fb_initVisual(self);
+   fb_initBuffer(self);
+@@ -692,7 +692,7 @@ static void fb_close(_self)
+   if (self->fd >= 0)
+     {
+       close(self->fd);
+-      dprintf("%s (%d) closed\n", self->fbName, self->fd);
++      Dprintf("%s (%d) closed\n", self->fbName, self->fd);
+       self->fd= -1;
+     }
+   self->kb= 0;
+--- Squeak-3.10-4/platforms/unix/vm-display-fbdev/sqUnixFBDevKeyboard.c.orig	2012-02-28 17:10:22.302168253 -0300
++++ Squeak-3.10-4/platforms/unix/vm-display-fbdev/sqUnixFBDevKeyboard.c	2012-02-28 17:10:26.921168298 -0300
+@@ -74,7 +74,7 @@ static void updateModifiers(int kstate)
+   if (kstate & (1 << KG_CTRL))	modifierState |= CtrlKeyBit;
+   if (kstate & (1 << KG_ALT))	modifierState |= CommandKeyBit;
+   if (kstate & (1 << KG_ALTGR))	modifierState |= OptionKeyBit;
+-  dprintf("state %02x mod %02x\n", kstate, modifierState);
++  Dprintf("state %02x mod %02x\n", kstate, modifierState);
+ }
+ 
+ 
+@@ -110,19 +110,19 @@ static void kb_translate(_self, int code
+   int rep= (!up) && (prev == code);
+   prev= up ? 0 : code;
+ 
+-  dprintf("+++ code %d up %d prev %d rep %d map %p\n", code, up, prev, rep, keyMap);
++  Dprintf("+++ code %d up %d prev %d rep %d map %p\n", code, up, prev, rep, keyMap);
+ 
+   if (keyMap)
+     {
+       int sym=  keyMap[code];
+       int type= KTYP(sym);
+-      dprintf("+++ sym %x (%02x) type %d\n", sym, sym & 255, type);
++      Dprintf("+++ sym %x (%02x) type %d\n", sym, sym & 255, type);
+       sym &= 255;
+       if (type >= 0xf0)		// shiftable
+ 	type -= 0xf0;
+       if (KT_LETTER == type)	// lockable
+ 	type= KT_LATIN;
+-      dprintf("+++ type %d\n", type);
++      Dprintf("+++ type %d\n", type);
+       switch (type)
+ 	{
+ 	case KT_LATIN:
+@@ -165,7 +165,7 @@ static void kb_translate(_self, int code
+ 
+ 	default:
+ 	  if (type > KT_SLOCK)
+-	    dprintf("ignoring unknown scancode %d.%d\n", type, sym);
++	    Dprintf("ignoring unknown scancode %d.%d\n", type, sym);
+ 	  break;
+ 	}
+     }
+@@ -177,13 +177,13 @@ static void kb_noCallback(int k, int u,
+ 
+ static int kb_handleEvents(_self)
+ {
+-  dprintf("+++ kb_handleEvents\n");
++  Dprintf("+++ kb_handleEvents\n");
+   while (fdReadable(self->fd, 0))
+     {
+       unsigned char buf;
+       if (1 == read(self->fd, &buf, 1))
+ 	{
+-	  dprintf("+++ kb_translate %3d %02x + %d\n", buf & 127, buf & 127, (buf >> 7) & 1);
++	  Dprintf("+++ kb_translate %3d %02x + %d\n", buf & 127, buf & 127, (buf >> 7) & 1);
+ 	  kb_translate(self, buf & 127, (buf >> 7) & 1);
+ 	}
+     }
+@@ -334,7 +334,7 @@ void kb_close(_self)
+       ioctl(self->fd, KDSKBMODE, self->kbMode);
+       tcsetattr(self->fd, TCSANOW, &self->tcAttr);
+       close(self->fd);
+-      dprintf("%s (%d) closed\n", self->kbName, self->fd);
++      Dprintf("%s (%d) closed\n", self->kbName, self->fd);
+       self->fd= -1;
+     }
+ }
+--- Squeak-3.10-4/platforms/unix/vm-display-fbdev/sqUnixFBDevKeymap.c.orig	2012-02-28 17:09:29.131167267 -0300
++++ Squeak-3.10-4/platforms/unix/vm-display-fbdev/sqUnixFBDevKeymap.c	2012-02-28 17:11:22.377169117 -0300
+@@ -156,7 +156,7 @@ static void kb_loadKernelKeyMap(_self)
+ {
+   int map;
+ 
+-  dprintf("loading kernel keymap\n");
++  Dprintf("loading kernel keymap\n");
+ 
+   if (!(self->keyMaps= (unsigned short **)calloc(MAX_NR_KEYMAPS, sizeof(unsigned short *))))
+     outOfMemory();
+@@ -186,7 +186,7 @@ static void kb_loadKernelKeyMap(_self)
+ 	}
+     }
+ 
+-  dprintf("kernel keymap loaded\n");
++  Dprintf("kernel keymap loaded\n");
+ }
+ 
+ 
+@@ -195,7 +195,7 @@ static void kb_initKeyMap(_self, char *m
+   if (!mapfile)
+     kb_loadKernelKeyMap(self);
+   else if ((kb_loadKeys(self, mapfile)))
+-    dprintf("using keymap '%s'\n", mapfile);
++    Dprintf("using keymap '%s'\n", mapfile);
+   else
+     fatal("could not load keymap '%s'\n", mapfile);
+ }
+--- Squeak-3.10-4/platforms/unix/vm-display-fbdev/sqUnixFBDevMouse.c.orig	2012-02-28 17:10:37.536168576 -0300
++++ Squeak-3.10-4/platforms/unix/vm-display-fbdev/sqUnixFBDevMouse.c	2012-02-28 17:10:41.860168846 -0300
+@@ -92,7 +92,7 @@ static int ms_read(_self, unsigned char
+ 	int i= 0;
+ 	while (i < count)
+ 	  {
+-	    dprintf("<%02x\n", out[i]);
++	    Dprintf("<%02x\n", out[i]);
+ 	    ++i;
+ 	  }
+       }
+@@ -200,7 +200,7 @@ static int ms_open(_self, char *msDev, c
+ 	}
+     }
+ 
+-  dprintf("using: %s (%d), %s\n", self->msName, self->fd, msProto);
++  Dprintf("using: %s (%d), %s\n", self->msName, self->fd, msProto);
+ 
+   self->init= init;
+   self->handleEvents= handler;
+@@ -214,7 +214,7 @@ static void ms_close(_self)
+   if (self->fd >= 0)
+     {
+       close(self->fd);
+-      dprintf("%s (%d) closed\n", self->msName, self->fd);
++      Dprintf("%s (%d) closed\n", self->msName, self->fd);
+       self->fd= -1;
+     }
+ }
+--- Squeak-3.10-4/platforms/unix/vm-display-fbdev/sqUnixFBDevMousePS2.c.orig	2012-02-28 17:11:00.013168861 -0300
++++ Squeak-3.10-4/platforms/unix/vm-display-fbdev/sqUnixFBDevMousePS2.c	2012-02-28 17:11:04.626169010 -0300
+@@ -62,7 +62,7 @@
+ static void ms_ps2_flush(_self)
+ {
+   unsigned char buf[32];
+-  dprintf("%s: flush\n", self->msName);
++  Dprintf("%s: flush\n", self->msName);
+   while (ms_read(self, buf, sizeof(buf), 1, PS2_FLUSH_DELAY))
+     ;
+ }
+@@ -106,15 +106,15 @@ static int ms_ps2_send(_self, unsigned c
+ {
+   unsigned char buf[1];
+   int i;
+-  dprintf("%s: send\n", self->msName);
++  Dprintf("%s: send\n", self->msName);
+   for (i= 0;  i < len;  ++i)
+     {
+     resend:
+       write(self->fd, command + i, 1);
+-      dprintf(">%02x\n", command[i]);
++      Dprintf(">%02x\n", command[i]);
+       if (1 != ms_read(self, buf, 1, 1, PS2_SEND_DELAY))
+ 	{
+-	  dprintf("%s: send failed\n", self->msName);
++	  Dprintf("%s: send failed\n", self->msName);
+ 	  return 0;
+ 	}
+       switch (buf[0])
+@@ -126,7 +126,7 @@ static int ms_ps2_send(_self, unsigned c
+ 	  fprintf(stderr, "%s: error response in send\n", self->msName);
+ 	  return 0;
+ 	case PS2_RESEND:
+-	  dprintf("%s: resend\n", self->msName);
++	  Dprintf("%s: resend\n", self->msName);
+ 	  goto resend;
+ 	default:
+ 	  fprintf(stderr, "%s: illegal response %02x in send\n", self->msName, buf[0]);
+@@ -140,9 +140,9 @@ static int ms_ps2_send(_self, unsigned c
+ static void ms_ps2_disable(_self)
+ {
+   unsigned char command[]= { PS2_DISABLE };
+-  dprintf("%s: disable\n", self->msName);
++  Dprintf("%s: disable\n", self->msName);
+   write(self->fd, command, 1);
+-  dprintf(">%02x\n", command[0]);
++  Dprintf(">%02x\n", command[0]);
+   while (1 == ms_read(self, command, 1, 1, PS2_DISABLE_DELAY))
+     if (PS2_OK == command[0])
+       break;
+@@ -152,7 +152,7 @@ static void ms_ps2_disable(_self)
+ static int ms_ps2_enable(_self)
+ {
+   unsigned char command[]= { PS2_ENABLE };
+-  dprintf("%s: enable\n", self->msName);
++  Dprintf("%s: enable\n", self->msName);
+   return ms_ps2_send(self, command, sizeof(command));
+ }
+ 
+@@ -160,12 +160,12 @@ static int ms_ps2_enable(_self)
+ static int ms_ps2_reset(_self)
+ {
+   unsigned char command[]= { PS2_RESET }, buf[2];
+-  dprintf("%s: reset\n", self->msName);
++  Dprintf("%s: reset\n", self->msName);
+   if (!ms_ps2_send(self, command, sizeof(command)))
+     return -1;
+   if (2 == ms_read(self, buf, 2, 2, PS2_RESET_DELAY))
+     {
+-      dprintf("%s: response %02x %02x\n", self->msName, buf[0], buf[1]);
++      Dprintf("%s: response %02x %02x\n", self->msName, buf[0], buf[1]);
+       switch (buf[0])
+ 	{
+ 	case PS2_SELFTEST_OK:
+@@ -175,7 +175,7 @@ static int ms_ps2_reset(_self)
+ 	  fprintf(stderr, "%s: self-test failed\n", self->msName);
+ 	  break;
+ 	default:
+-	  dprintf("%s: bad response\n", self->msName);
++	  Dprintf("%s: bad response\n", self->msName);
+ 	  break;
+ 	}
+     }
+@@ -184,7 +184,7 @@ static int ms_ps2_reset(_self)
+      up the mouse id immediately in the flush(), so the only harm done
+      is a misleading "reset failed" message while debugging.  */
+   ms_ps2_flush(self);
+-  dprintf("%s: reset failed\n", self->msName);
++  Dprintf("%s: reset failed\n", self->msName);
+   return -1;
+ }
+ 
+@@ -194,7 +194,7 @@ static void ms_ps2_init(_self)
+   int id;
+   ms_ps2_disable(self);
+   id= ms_ps2_reset(self);
+-  dprintf("%s: mouse id %02x\n", self->msName, id);
++  Dprintf("%s: mouse id %02x\n", self->msName, id);
+   ms_ps2_enable(self);
+ }
+ 
+--- Squeak-3.10-4/platforms/unix/vm-display-X11/sqUnixXdnd.c.orig	2012-02-28 17:05:08.393162772 -0300
++++ Squeak-3.10-4/platforms/unix/vm-display-X11/sqUnixXdnd.c	2012-02-28 17:05:55.533163379 -0300
+@@ -137,9 +137,9 @@ enum {
+ 
+ 
+ #if (DEBUG_XDND)
+-# define dprintf(ARGS) do { fprintf ARGS; } while (0)
++# define Dprintf(ARGS) do { fprintf ARGS; } while (0)
+ #else
+-# define dprintf(ARGS) do { } while (0)
++# define Dprintf(ARGS) do { } while (0)
+ #endif
+ 
+ static void updateCursor(int state);
+@@ -218,7 +218,7 @@ static char *uri2string(const char *uri)
+     {
+       strncpy(string, uri, len);
+     }
+-  dprintf((stderr, "  uri2string: <%s>\n", string));
++  Dprintf((stderr, "  uri2string: <%s>\n", string));
+   return string;
+ }
+ 
+@@ -284,7 +284,7 @@ static void sendClientMessage(long *data
+   evt->data.l[3]= data[3];
+   evt->data.l[4]= data[4];
+   XSendEvent(stDisplay, target, 0, 0, &e);
+-/*dprintf((stderr, "Send %s to: 0x%lx\n", type, target));*/
++/*Dprintf((stderr, "Send %s to: 0x%lx\n", type, target));*/
+ }
+ 
+ static void sendEnter(Window target, Window source)
+@@ -305,7 +305,7 @@ static void sendEnter(Window target, Win
+ 	    }
+ 	}
+     }
+-  dprintf((stderr, "Send XdndEnter (output) source: 0x%lx target: 0x%lx\n", source, target));
++  Dprintf((stderr, "Send XdndEnter (output) source: 0x%lx target: 0x%lx\n", source, target));
+   sendClientMessage(data, source, target, XdndEnter);
+ }
+ 
+@@ -324,7 +324,7 @@ static void sendDrop(Window target, Wind
+ {
+   long data[5]= { 0, 0, 0, 0, 0 };
+   data[2]= timestamp;
+-  dprintf((stderr, "Send XdndDrop (output) source: 0x%lx target: 0x%lx\n", source, target));
++  Dprintf((stderr, "Send XdndDrop (output) source: 0x%lx target: 0x%lx\n", source, target));
+ 
+   sendClientMessage(data, source, target, XdndDrop);
+ }
+@@ -333,14 +333,14 @@ static void sendDrop(Window target, Wind
+ static void sendLeave(Window target, Window source)
+ {
+   long data[5]= { 0, 0, 0, 0, 0 };
+-  dprintf((stderr, "Send XdndLeave (output) source: 0x%lx target: 0x%lx\n", source, target));
++  Dprintf((stderr, "Send XdndLeave (output) source: 0x%lx target: 0x%lx\n", source, target));
+   sendClientMessage(data, source, target, XdndLeave);
+ }
+ 
+ 
+ static enum XdndState dndOutInitialize(enum XdndState state)
+ {
+-  dprintf((stderr, "Internal signal DndOutStart (output)\n"));
++  Dprintf((stderr, "Internal signal DndOutStart (output)\n"));
+   memset(&xdndOutRequestEvent, 0, sizeof(xdndOutRequestEvent));
+   XSetSelectionOwner(stDisplay, XdndSelection, DndWindow, CurrentTime);
+   updateCursor(-1);
+@@ -373,7 +373,7 @@ static enum XdndState dndOutMotion(enum
+       return XdndStateOutTracking;
+     }
+   
+-  dprintf((stderr, "Receive MotionNotify (output) root: 0x%lx awareWindow: 0x%lx\n", evt->root, currentWindow));
++  Dprintf((stderr, "Receive MotionNotify (output) root: 0x%lx awareWindow: 0x%lx\n", evt->root, currentWindow));
+   if (currentWindow != xdndOutTarget)
+     {
+       sendLeave(xdndOutTarget, DndWindow);
+@@ -392,7 +392,7 @@ static enum XdndState dndOutMotion(enum
+ static enum XdndState dndOutStatus(enum XdndState state, XClientMessageEvent *evt)
+ {
+   long *ldata= evt->data.l;
+-  dprintf((stderr, "Receive XdndStatus (output) status: 0x%lx target: 0x%lx\n", ldata[1], ldata[0]));
++  Dprintf((stderr, "Receive XdndStatus (output) status: 0x%lx target: 0x%lx\n", ldata[1], ldata[0]));
+ 
+   if ((XdndStateOutTracking != state) && (XdndStateOutAccepted != state))
+     {
+@@ -415,7 +415,7 @@ static enum XdndState dndOutStatus(enum
+ static enum XdndState dndOutRelease(enum XdndState state, XButtonEvent *evt)
+ {
+   if (XdndStateIdle == state) return XdndStateIdle;
+-  dprintf((stderr, "Receive ButtonRelease (output) window: 0x%lx\n", evt->window));
++  Dprintf((stderr, "Receive ButtonRelease (output) window: 0x%lx\n", evt->window));
+ 
+   if (XdndStateOutAccepted == state)
+     {
+@@ -431,7 +431,7 @@ static enum XdndState dndOutRelease(enum
+ */
+ static enum XdndState dndOutSelectionRequest(enum XdndState state, XSelectionRequestEvent *req)
+ {
+-  dprintf((stderr, "Receive SelectionRequest for %s (output) owner: 0x%lx : requestor: 0x%lx\n",
++  Dprintf((stderr, "Receive SelectionRequest for %s (output) owner: 0x%lx : requestor: 0x%lx\n",
+            XGetAtomName(stDisplay, req->target), req->owner, req->requestor));
+   if (XdndStateOutAccepted != state)
+     {
+@@ -448,7 +448,7 @@ static enum XdndState dndOutSelectionReq
+  */
+ static enum XdndState dndOutFinished(enum XdndState state, XClientMessageEvent *evt)
+ {
+-  dprintf((stderr, "Receive XdndFinished (output) source: 0x%lx target: 0x%lx\n",
++  Dprintf((stderr, "Receive XdndFinished (output) source: 0x%lx target: 0x%lx\n",
+            DndWindow, xdndFinished_targetWindow(evt)));
+   xdndOutTarget= None;
+   return XdndStateIdle;
+@@ -467,7 +467,7 @@ static void updateCursor(int state)
+   static int lastCursor= -1;
+ 
+   if (lastCursor == state) return;
+-  dprintf((stderr, "Cursor change (output) previous: %i new: %i\n", lastCursor, state));
++  Dprintf((stderr, "Cursor change (output) previous: %i new: %i\n", lastCursor, state));
+   if (1 == state)
+     {
+       Cursor cursor;
+@@ -532,7 +532,7 @@ static void dndGetTypeList(XClientMessag
+ 
+   if (xdndEnter_hasThreeTypes(evt))
+     {
+-      dprintf((stderr, "  3 types\n"));
++      Dprintf((stderr, "  3 types\n"));
+       updateInTypes((Atom *) xdndEnter_targets(evt), 3);
+     }
+   else
+@@ -554,7 +554,7 @@ static void dndGetTypeList(XClientMessag
+ 
+       updateInTypes((Atom *) data, count);
+       XFree(data);
+-      dprintf((stderr, "  %ld types\n", count));
++      Dprintf((stderr, "  %ld types\n", count));
+     }
+ 
+   /* We only accept filenames (MIME type "text/uri-list"). */
+@@ -562,7 +562,7 @@ static void dndGetTypeList(XClientMessag
+     int i;
+     for (i= 0;  xdndInTypes[i];  ++i)
+       {
+-	dprintf((stderr, "  type %d == %ld %s\n", i, xdndInTypes[i], XGetAtomName(stDisplay, xdndInTypes[i])));
++	Dprintf((stderr, "  type %d == %ld %s\n", i, xdndInTypes[i], XGetAtomName(stDisplay, xdndInTypes[i])));
+ 	if (XdndTextUriList == xdndInTypes[i])
+ 	  {
+ 	    isUrlList= 1;
+@@ -591,7 +591,7 @@ static void dndSendStatus(int willAccept
+ 
+   XSendEvent(stDisplay, xdndSourceWindow, 0, 0, (XEvent *)&evt);
+ 
+-  /* dprintf((stderr, "  sent status to 0x%lx willAccept=%d data=%ld action=%s(%ld)\n",
++  /* Dprintf((stderr, "  sent status to 0x%lx willAccept=%d data=%ld action=%s(%ld)\n",
+              xdndSourceWindow, willAccept, evt.data.l[1], XGetAtomName(stDisplay, action), action)); */
+ }
+ 
+@@ -609,13 +609,13 @@ static void dndSendFinished(void)
+     xdndFinished_targetWindow(&evt)= DndWindow;
+     XSendEvent(stDisplay, xdndSourceWindow, 0, 0, (XEvent *)&evt);
+ 
+-    dprintf((stderr, "dndSendFinished target: 0x%lx source: 0x%lx\n", DndWindow, xdndSourceWindow));
++    Dprintf((stderr, "dndSendFinished target: 0x%lx source: 0x%lx\n", DndWindow, xdndSourceWindow));
+ }
+ 
+ 
+ static enum XdndState dndInEnter(enum XdndState state, XClientMessageEvent *evt)
+ {
+-  dprintf((stderr, "Receive XdndEnter (input)\n"));
++  Dprintf((stderr, "Receive XdndEnter (input)\n"));
+   if (xdndEnter_version(evt) < 3)
+     {
+       fprintf(stderr, "  xdnd: protocol version %ld not supported\n", xdndEnter_version(evt));
+@@ -624,14 +624,14 @@ static enum XdndState dndInEnter(enum Xd
+   xdndSourceWindow= xdndEnter_sourceWindow(evt);
+   dndGetTypeList(evt);
+ 
+-  dprintf((stderr, "  dndEnter target: 0x%lx source: 0x%lx\n", evt->window, xdndSourceWindow));
++  Dprintf((stderr, "  dndEnter target: 0x%lx source: 0x%lx\n", evt->window, xdndSourceWindow));
+   return XdndStateEntered;
+ }
+ 
+ 
+ static enum XdndState dndInLeave(enum XdndState state)
+ {
+-  dprintf((stderr, "Receive XdndLeave (input)\n"));
++  Dprintf((stderr, "Receive XdndLeave (input)\n"));
+   recordDragEvent(DragLeave, 1);
+   return XdndStateIdle;
+ }
+@@ -639,11 +639,11 @@ static enum XdndState dndInLeave(enum Xd
+ 
+ static enum XdndState dndInPosition(enum XdndState state, XClientMessageEvent *evt)
+ {
+-  /*dprintf((stderr, "Receive XdndPosition (input)\n"));*/
++  /*Dprintf((stderr, "Receive XdndPosition (input)\n"));*/
+ 
+   if (xdndSourceWindow != xdndPosition_sourceWindow(evt))
+     {
+-      dprintf((stderr, "dndInPosition: wrong source window\n"));
++      Dprintf((stderr, "dndInPosition: wrong source window\n"));
+       return XdndStateIdle;
+     }
+ 
+@@ -651,7 +651,7 @@ static enum XdndState dndInPosition(enum
+ 
+   if ((state != XdndStateEntered) && (state != XdndStateTracking))
+     {
+-      dprintf((stderr, "dndInPosition: wrong state\n"));
++      Dprintf((stderr, "dndInPosition: wrong state\n"));
+       return XdndStateIdle;
+     }
+   
+@@ -661,20 +661,20 @@ static enum XdndState dndInPosition(enum
+   if (xdndWillAccept)
+     {
+       Atom action= xdndPosition_action(evt);
+-      /*dprintf((stderr, "  dndInPosition: action = %ld %s\n", action, XGetAtomName(stDisplay, action)));*/
++      /*Dprintf((stderr, "  dndInPosition: action = %ld %s\n", action, XGetAtomName(stDisplay, action)));*/
+       xdndWillAccept= (action == XdndActionMove) | (action == XdndActionCopy)
+ 	|             (action == XdndActionLink) | (action == XdndActionAsk);
+     }
+ 
+   if (xdndWillAccept)
+     {
+-      /*dprintf((stderr, "  dndInPosition: accepting\n"));*/
++      /*Dprintf((stderr, "  dndInPosition: accepting\n"));*/
+       dndSendStatus(1, XdndActionCopy);
+       recordDragEvent(DragMove, 1);
+     }
+   else /* won't accept */
+     {
+-      /*dprintf((stderr, "  dndInPosition: not accepting\n"));*/
++      /*Dprintf((stderr, "  dndInPosition: not accepting\n"));*/
+       dndSendStatus(0, XdndActionPrivate);
+     }
+   return XdndStateTracking;
+@@ -683,7 +683,7 @@ static enum XdndState dndInPosition(enum
+ 
+ enum XdndState dndInDrop(enum XdndState state, XClientMessageEvent *evt)
+ {
+-  dprintf((stderr, "Receive XdndDrop (input)\n"));
++  Dprintf((stderr, "Receive XdndDrop (input)\n"));
+ 
+   /* If there is "text/url-list" in xdndInTypes, the selection is
+    * processed only in DropFilesEvent. But if none (file count == 0),
+@@ -691,7 +691,7 @@ enum XdndState dndInDrop(enum XdndState
+    */
+   if (isUrlList == 0)
+     {
+-      dprintf((stderr, "  dndInDrop: no url list\n"));
++      Dprintf((stderr, "  dndInDrop: no url list\n"));
+       recordDragEvent(DragDrop, 0);
+       return state;
+     }
+@@ -699,12 +699,12 @@ enum XdndState dndInDrop(enum XdndState
+ 
+   if (xdndSourceWindow != xdndDrop_sourceWindow(evt))
+     {
+-      dprintf((stderr, "  dndInDrop: wrong source window\n"));
++      Dprintf((stderr, "  dndInDrop: wrong source window\n"));
+     }
+   else if (xdndWillAccept)
+     {
+       Window owner;
+-      dprintf((stderr, "  dndInDrop: converting selection\n"));
++      Dprintf((stderr, "  dndInDrop: converting selection\n"));
+       if (!(owner= XGetSelectionOwner(stDisplay, XdndSelection)))
+ 	fprintf(stderr, "  dndInDrop: XGetSelectionOwner failed\n");
+       else
+@@ -722,7 +722,7 @@ enum XdndState dndInDrop(enum XdndState
+     }
+   else
+     {
+-      dprintf((stderr, "  dndInDrop: refusing selection -- finishing\n"));
++      Dprintf((stderr, "  dndInDrop: refusing selection -- finishing\n"));
+     }
+ 
+   dndSendFinished();
+@@ -752,7 +752,7 @@ static void dndGetSelection(Window owner
+       char *item= 0;
+       while ((item= strtok(tokens, "\n\r")))
+ 	{
+-	  dprintf((stderr, "  got URI <%s>\n", item));
++	  Dprintf((stderr, "  got URI <%s>\n", item));
+ 	  if (!strncmp(item, "file:", 5))		/*** xxx BOGUS -- just while image is broken ***/
+ 	    {
+ 	      if (uxDropFileCount)
+@@ -765,7 +765,7 @@ static void dndGetSelection(Window owner
+ 	}
+       if (uxDropFileCount)
+ 	recordDragEvent(DragDrop, uxDropFileCount);
+-      dprintf((stderr, "  uxDropFileCount = %d\n", uxDropFileCount));
++      Dprintf((stderr, "  uxDropFileCount = %d\n", uxDropFileCount));
+     }
+   XFree(data);
+ }
+@@ -773,7 +773,7 @@ static void dndGetSelection(Window owner
+ 
+ static enum XdndState dndInSelectionNotify(enum XdndState state, XSelectionEvent *evt)
+ {
+-  dprintf((stderr, "Receive SelectionNotify (input)\n"));
++  Dprintf((stderr, "Receive SelectionNotify (input)\n"));
+   if (evt->property != XdndSelectionAtom) return state;
+ 
+   dndGetSelection(evt->requestor, evt->property);
+@@ -785,7 +785,7 @@ static enum XdndState dndInSelectionNoti
+ 
+ static enum XdndState dndInFinished(enum XdndState state)
+ {
+-  dprintf((stderr, "Internal signal DndInFinished (input)\n"));
++  Dprintf((stderr, "Internal signal DndInFinished (input)\n"));
+   dndSendFinished();
+   recordDragEvent(DragLeave, 1);
+   dndInDestroyTypes();
+@@ -850,7 +850,7 @@ static sqInt display_dndOutStart(char *t
+     xdndOutTypes[i]= XInternAtom(stDisplay, types + pos, False);
+ 
+   for (i= 0; i < typesSize; i++)
+-    dprintf((stderr, "dndOutStart: %s\n", XGetAtomName(stDisplay, xdndOutTypes[i])));
++    Dprintf((stderr, "dndOutStart: %s\n", XGetAtomName(stDisplay, xdndOutTypes[i])));
+   dndHandleEvent(DndOutStart, 0);
+ 
+   return 1;
+@@ -880,7 +880,7 @@ static void display_dndOutSend (char *by
+ 		  nbytes);
+ 
+   XSendEvent(stDisplay, res->requestor, False, 0, &notify);
+-  dprintf((stderr, "Send data for %s (output) requestor: 0x%lx\n",
++  Dprintf((stderr, "Send data for %s (output) requestor: 0x%lx\n",
+            XGetAtomName(stDisplay, res->target), res->requestor));
+ }
+ 
+--- Squeak-3.10-4/platforms/unix/vm/dlfcn-dyld.c.orig	2012-02-28 17:08:34.262166407 -0300
++++ Squeak-3.10-4/platforms/unix/vm/dlfcn-dyld.c	2012-02-28 17:08:38.480167583 -0300
+@@ -70,7 +70,7 @@ static void dlUndefined(const char *symb
+ 
+ static NSModule dlMultiple(NSSymbol s, NSModule oldModule, NSModule newModule)
+ {
+-  dprintf((stderr, "dyld: %s: %s previously defined in %s, new definition in %s\n",
++  Dprintf((stderr, "dyld: %s: %s previously defined in %s, new definition in %s\n",
+ 	   NSNameOfSymbol(s), NSNameOfModule(oldModule), NSNameOfModule(newModule)));
+   return newModule;
+ }
+@@ -128,7 +128,7 @@ static void *dlopen(const char *path, in
+   if (!handle)
+     dlSetError("could not load shared object: %s", path);
+ 
+-  dprintf((stderr, "dlopen: %s => %d\n", path, (int)handle));
++  Dprintf((stderr, "dlopen: %s => %d\n", path, (int)handle));
+ 
+   return handle;
+ }
+@@ -141,17 +141,17 @@ static void *dlsym(void *handle, const c
+ 
+   snprintf(_symbol, sizeof(_symbol), "_%s", symbol);
+ 
+-  dprintf((stderr, "dlsym: looking for %s (%s) in %d\n", symbol, _symbol, (int)handle));
++  Dprintf((stderr, "dlsym: looking for %s (%s) in %d\n", symbol, _symbol, (int)handle));
+ 
+   if (!handle)
+     {
+-      dprintf((stderr, "dlsym: setting app context for this handle\n"));
++      Dprintf((stderr, "dlsym: setting app context for this handle\n"));
+       handle= DL_APP_CONTEXT;
+     }
+ 
+   if (DL_APP_CONTEXT == handle)
+     {
+-      dprintf((stderr, "dlsym: looking in app context\n"));
++      Dprintf((stderr, "dlsym: looking in app context\n"));
+       if (NSIsSymbolNameDefined(_symbol))
+ 	nsSymbol= NSLookupAndBindSymbol(_symbol);
+     }
+@@ -167,15 +167,15 @@ static void *dlsym(void *handle, const c
+ 		 _symbol,
+ 		 NSLOOKUPSYMBOLINIMAGE_OPTION_BIND
+ 		 /*| NSLOOKUPSYMBOLINIMAGE_OPTION_RETURN_ON_ERROR*/);
+-	      dprintf((stderr, "dlsym: bundle (image) lookup returned %p\n", nsSymbol));
++	      Dprintf((stderr, "dlsym: bundle (image) lookup returned %p\n", nsSymbol));
+ 	    }
+ 	  else
+-	    dprintf((stderr, "dlsym: bundle (image) symbol not defined\n"));
++	    Dprintf((stderr, "dlsym: bundle (image) symbol not defined\n"));
+ 	}
+       else
+ 	{
+ 	  nsSymbol= NSLookupSymbolInModule(handle, _symbol);
+-	  dprintf((stderr, "dlsym: dylib (module) lookup returned %p\n", nsSymbol));
++	  Dprintf((stderr, "dlsym: dylib (module) lookup returned %p\n", nsSymbol));
+ 	}
+     }
+ 
+--- Squeak-3.10-4/platforms/unix/vm-sound-NAS/sqUnixSoundNAS.c.orig	2012-02-28 17:08:20.562166268 -0300
++++ Squeak-3.10-4/platforms/unix/vm-sound-NAS/sqUnixSoundNAS.c	2012-02-28 17:08:24.550166256 -0300
+@@ -34,9 +34,9 @@
+ #include <assert.h>
+ 
+ #ifdef DEBUG
+-# define dprintf printf
++# define Dprintf printf
+ #else
+-  static void dprintf(char *fmt, ...) {}
++  static void Dprintf(char *fmt, ...) {}
+ #endif
+ 
+ 
+@@ -148,7 +148,7 @@ static int sound_PlaySamplesFromAtLength
+   char *buf;   /* buffer to play from; it may not be arrayIndex if a
+                   conversion is necessary */
+ 
+-  dprintf("PlaySamples(frameCount=%d, arrayIndex=%d, startIndex=%d\n",
++  Dprintf("PlaySamples(frameCount=%d, arrayIndex=%d, startIndex=%d\n",
+ 	  frameCount, arrayIndex, startIndex);
+   
+   /* figure out how much to play */
+@@ -170,7 +170,7 @@ static int sound_PlaySamplesFromAtLength
+       int i;
+       short *sbuf;  /* the buffer, as short's instead of char's */
+ 
+-      dprintf("converting\n");
++      Dprintf("converting\n");
+       
+       buf= malloc(2 * frameCount);
+       if(buf == NULL)
+@@ -188,7 +188,7 @@ static int sound_PlaySamplesFromAtLength
+     }
+       
+ 	
+-  dprintf("writing %d bytes (%d frames)\n", bytesToPlay, framesToPlay);
++  Dprintf("writing %d bytes (%d frames)\n", bytesToPlay, framesToPlay);
+   AuWriteElement(server, flow, 0,
+ 		 bytesToPlay,
+ 		 buf,
+@@ -213,7 +213,7 @@ static int sound_PlaySamplesFromAtLength
+ static void handleAudioEvents(int fd, void *data, int flags)
+ {
+   if(!server) {
+-    dprintf( "handleAudioEvents called while unconnected!\n");
++    Dprintf( "handleAudioEvents called while unconnected!\n");
+     return;
+   }
+ 
+@@ -224,7 +224,7 @@ static void handleAudioEvents(int fd, vo
+   while(AuEventsQueued(server, AuEventsQueuedAlready)) {
+     AuEvent event;
+     AuNextEvent(server, AuTrue, &event);
+-    dprintf("event of type %d\n", event.type);
++    Dprintf("event of type %d\n", event.type);
+     
+     switch(event.type) {
+     case 0:
+@@ -246,15 +246,15 @@ static void handleAudioEvents(int fd, vo
+ 
+ 	switch(enEvent->kind) {
+ 	case AuElementNotifyKindLowWater:
+-	  dprintf("low water event\n");
++	  Dprintf("low water event\n");
+ 	  bytesAvail += enEvent->num_bytes;
+ 	  break;
+ 	case AuElementNotifyKindHighWater:
+-	  dprintf("high water event\n");
++	  Dprintf("high water event\n");
+ 	  bytesAvail += enEvent->num_bytes;
+ 	  break;
+ 	case AuElementNotifyKindState:
+-	  dprintf("state change (%d->%d)\n",
++	  Dprintf("state change (%d->%d)\n",
+ 		  enEvent->prev_state,
+ 		  enEvent->cur_state);
+ 	  bytesAvail += enEvent->num_bytes;
+@@ -262,7 +262,7 @@ static void handleAudioEvents(int fd, vo
+ 	       /* if the flow has stopped, then arrange for it to get started again */
+ 	       /* XXX there is probably a more intelligent place to do
+                   this, in case there is a real reason it has paused */
+-	       dprintf("unpausing\n");
++	       Dprintf("unpausing\n");
+ 	       AuStartFlow(server, flow, NULL);
+ 	       AuFlush(server);
+ 	  }
+@@ -274,7 +274,7 @@ static void handleAudioEvents(int fd, vo
+   }
+ 
+   if(bytesAvail > 0) {
+-    dprintf("bytesAvail: %d\n", bytesAvail);
++    Dprintf("bytesAvail: %d\n", bytesAvail);
+     signalSemaphoreWithIndex(semaIndex);
+   }
+ 
+@@ -327,10 +327,10 @@ static int sound_Start(int frameCount, i
+   
+ 
+   /* open the server */
+-  dprintf("opening server\n");
++  Dprintf("opening server\n");
+   server = AuOpenServer(NULL, 0, NULL, 0, NULL, NULL);
+   if(server == NULL) {
+-    dprintf("failed to open audio server\n");
++    Dprintf("failed to open audio server\n");
+     return false;
+   }
+ 
+@@ -344,7 +344,7 @@ static int sound_Start(int frameCount, i
+   /* pick a device to play to */ 
+   device = choose_nas_device(server, samplesPerSec, stereo, 0);
+   if(device == AuNone) {
+-    dprintf("no available device on the server!\n");
++    Dprintf("no available device on the server!\n");
+     AuCloseServer(server);
+     server = NULL;
+     return false;
+@@ -360,12 +360,12 @@ static int sound_Start(int frameCount, i
+ 
+ 
+   /* create a flow to write on */
+-  dprintf("creating flow\n");
++  Dprintf("creating flow\n");
+   flow = AuCreateFlow(server, NULL);
+ 
+ 
+   /* create client and device elements to play with */
+-  dprintf("creating elements(%d,%d)\n",
++  Dprintf("creating elements(%d,%d)\n",
+ 	 frameCount, frameCount / 4);
+   AuMakeElementImportClient(&elements[0],
+ 			    samplesPerSec,
+@@ -390,7 +390,7 @@ static int sound_Start(int frameCount, i
+ 		NULL);
+ 
+   /* start her up */
+-  dprintf("starting flow\n");
++  Dprintf("starting flow\n");
+   AuStartFlow(server, flow, NULL);
+   AuFlush(server);
+   
+@@ -422,14 +422,14 @@ static int sound_StartRecording(int desi
+ 			        element 1 = client export */
+   AuDeviceID device;      /* physical device ID to use */
+   
+-  dprintf("StartRecording\n");
++  Dprintf("StartRecording\n");
+   
+   sound_Stop();
+ 
+-  dprintf("opening server\n");
++  Dprintf("opening server\n");
+   server = AuOpenServer(NULL, 0, NULL, 0, NULL, NULL);
+   if(server == NULL) {
+-    dprintf("failed to open audio server\n");
++    Dprintf("failed to open audio server\n");
+     return false;
+   }
+ 
+@@ -441,7 +441,7 @@ static int sound_StartRecording(int desi
+ 
+   device= choose_nas_device(server, desiredSamplesPerSec, stereo, 1);
+   if(device == AuNone) {
+-    dprintf("no available device on the server!\n");
++    Dprintf("no available device on the server!\n");
+     AuCloseServer(server);
+     server = NULL;
+     return false;
+@@ -458,12 +458,12 @@ static int sound_StartRecording(int desi
+   
+ 
+   /* create a flow to read from */
+-  dprintf("creating flow\n");
++  Dprintf("creating flow\n");
+   flow = AuCreateFlow(server, NULL);
+ 
+ 
+   /* create client and device elements to record with */
+-  dprintf("creating elements\n");
++  Dprintf("creating elements\n");
+ 
+   
+   AuMakeElementImportDevice(&elements[0],
+@@ -491,7 +491,7 @@ static int sound_StartRecording(int desi
+ 		NULL);
+ 
+   /* start her up */
+-  dprintf("starting flow\n");
++  Dprintf("starting flow\n");
+   AuStartFlow(server, flow, NULL);
+   AuFlush(server);
+   
+@@ -528,7 +528,7 @@ static int sound_RecordSamplesIntoAtLeng
+   int sliceSize= (stereo ? 4 : 2);   /* a "slice" seems to be a "frame": one sample from each channel */
+   
+ 
+-  dprintf("RecordSamplesIntoAtLength(buf=%d, startSliceIndex=%d, bufferSizeInBytes=%d\n",
++  Dprintf("RecordSamplesIntoAtLength(buf=%d, startSliceIndex=%d, bufferSizeInBytes=%d\n",
+ 	  buf, startSliceIndex, bufferSizeInBytes);
+   
+   
+@@ -546,7 +546,7 @@ static int sound_RecordSamplesIntoAtLeng
+   if(bytesToRead > bytesAvail)
+     bytesToRead= bytesAvail;
+ 
+-  dprintf("reading %d bytes\n", bytesToRead);
++  Dprintf("reading %d bytes\n", bytesToRead);
+   
+ 
+   /* read it */
+--- Squeak-3.10-4/platforms/unix/vm/sqUnixExternalPrims.c.orig	2012-02-28 17:08:57.192166771 -0300
++++ Squeak-3.10-4/platforms/unix/vm/sqUnixExternalPrims.c	2012-02-28 17:09:01.111166818 -0300
+@@ -35,9 +35,9 @@
+ #include "sq.h"		/* sqUnixConfig.h */
+ 
+ #if (DEBUG)
+-# define dprintf(ARGS) fprintf ARGS
++# define Dprintf(ARGS) fprintf ARGS
+ #else
+-# define dprintf(ARGS)
++# define Dprintf(ARGS)
+ #endif
+  
+ #if !defined(HAVE_LIBDL) && defined(HAVE_DYLD)
+@@ -134,10 +134,10 @@ static void *tryLoading(char *dirName, c
+ 	int         err;
+ 	sprintf(libName, "%s%s%s%s", dirName, *prefix, moduleName, *suffix);
+ 	if ((!(err= stat(libName, &buf))) && S_ISDIR(buf.st_mode))
+-	  dprintf((stderr, "ignoring directory: %s\n", libName));
++	  Dprintf((stderr, "ignoring directory: %s\n", libName));
+ 	else
+ 	  {
+-	    dprintf((stderr, "tryLoading %s\n", libName));
++	    Dprintf((stderr, "tryLoading %s\n", libName));
+ 	    handle= dlopen(libName, RTLD_NOW | RTLD_GLOBAL);
+ 	    if (handle == 0)
+ 	      {
+@@ -165,7 +165,7 @@ static void *tryLoadingPath(char *varNam
+   if (path)
+     {
+       char pbuf[MAXPATHLEN];
+-      dprintf((stderr, "try %s=%s\n", varName, path));
++      Dprintf((stderr, "try %s=%s\n", varName, path));
+       strncpy(pbuf, path, sizeof(pbuf));
+       pbuf[sizeof(pbuf) - 1]= '\0';
+       for (path= strtok(pbuf, ":");
+@@ -174,7 +174,7 @@ static void *tryLoadingPath(char *varNam
+ 	{
+ 	  char buf[MAXPATHLEN];
+ 	  sprintf(buf, "%s/", path);
+-	  dprintf((stderr, "  path dir = %s\n", buf));
++	  Dprintf((stderr, "  path dir = %s\n", buf));
+ 	  if ((handle= tryLoading(buf, pluginName)) != 0)
+ 	    break;
+ 	}
+@@ -197,7 +197,7 @@ void *ioLoadModule(char *pluginName)
+ 	fprintf(stderr, "ioLoadModule(<intrinsic>): %s\n", dlerror());
+       else
+ 	{
+-	  dprintf((stderr, "loaded: <intrinsic>\n"));
++	  Dprintf((stderr, "loaded: <intrinsic>\n"));
+ 	  return handle;
+ 	}
+     }
+@@ -218,7 +218,7 @@ void *ioLoadModule(char *pluginName)
+ 	      *out++= c;
+ 	  }
+ 	*out= '\0';
+-	dprintf((stderr, "ioLoadModule plugins = %s\n                path = %s\n",
++	Dprintf((stderr, "ioLoadModule plugins = %s\n                path = %s\n",
+ 		 squeakPlugins, path));
+ 	if ((handle= tryLoading("", path)))
+ 	  return handle;
+@@ -310,7 +310,7 @@ void *ioFindExternalFunctionIn(char *loo
+ 
+   fn= dlsym(moduleHandle, buf);
+ 
+-  dprintf((stderr, "ioFindExternalFunctionIn(%s, %d)\n",
++  Dprintf((stderr, "ioFindExternalFunctionIn(%s, %d)\n",
+ 	   lookupName, moduleHandle));
+ 
+   if ((fn == 0) && (!sqIgnorePluginErrors)
+@@ -333,7 +333,7 @@ sqInt ioFreeModule(void *moduleHandle)
+ {
+   if (dlclose(moduleHandle))
+     {
+-      dprintf((stderr, "ioFreeModule(%d): %s\n", moduleHandle, dlerror()));
++      Dprintf((stderr, "ioFreeModule(%d): %s\n", moduleHandle, dlerror()));
+       return 0;
+     }
+   return 1;
+--- Squeak-3.10-4/platforms/unix/vm/sqUnixMemory.c.orig	2012-02-28 17:08:46.043166536 -0300
++++ Squeak-3.10-4/platforms/unix/vm/sqUnixMemory.c	2012-02-28 17:08:50.273166689 -0300
+@@ -117,7 +117,7 @@ void *uxAllocateMemory(sqInt minHeapSize
+   pageSize= getpagesize();
+   pageMask= ~(pageSize - 1);
+ 
+-  dprintf(("uxAllocateMemory: pageSize 0x%x (%d), mask 0x%x\n", pageSize, pageSize, pageMask));
++  Dprintf(("uxAllocateMemory: pageSize 0x%x (%d), mask 0x%x\n", pageSize, pageSize, pageMask));
+ 
+ #if (!MAP_ANON)
+   if ((devZero= open("/dev/zero", O_RDWR)) < 0)
+@@ -127,14 +127,14 @@ void *uxAllocateMemory(sqInt minHeapSize
+     }
+ #endif
+ 
+-  dprintf(("uxAllocateMemory: /dev/zero descriptor %d\n", devZero));
+-  dprintf(("uxAllocateMemory: min heap %d, desired %d\n", minHeapSize, desiredHeapSize));
++  Dprintf(("uxAllocateMemory: /dev/zero descriptor %d\n", devZero));
++  Dprintf(("uxAllocateMemory: min heap %d, desired %d\n", minHeapSize, desiredHeapSize));
+ 
+   heapLimit= valign(max(desiredHeapSize, useMmap));
+ 
+   while ((!heap) && (heapLimit >= minHeapSize))
+     {
+-      dprintf(("uxAllocateMemory: mapping 0x%08x bytes (%d Mbytes)\n", heapLimit, heapLimit >> 20));
++      Dprintf(("uxAllocateMemory: mapping 0x%08x bytes (%d Mbytes)\n", heapLimit, heapLimit >> 20));
+       if (MAP_FAILED == (heap= mmap(0, heapLimit, MAP_PROT, MAP_FLAGS, devZero, 0)))
+ 	{
+ 	  heap= 0;
+@@ -166,17 +166,17 @@ char *uxGrowMemoryBy(char *oldLimit, sqI
+     {
+       int newSize=  min(valign(oldLimit - heap + delta), heapLimit);
+       int newDelta= newSize - heapSize;
+-      dprintf(("uxGrowMemory: %p By: %d(%d) (%d -> %d)\n", oldLimit, newDelta, delta, heapSize, newSize));
++      Dprintf(("uxGrowMemory: %p By: %d(%d) (%d -> %d)\n", oldLimit, newDelta, delta, heapSize, newSize));
+       assert(0 == (newDelta & ~pageMask));
+       assert(0 == (newSize  & ~pageMask));
+       assert(newDelta >= 0);
+       if (newDelta)
+ 	{
+-	  dprintf(("was: %p %p %p = 0x%x (%d) bytes\n", heap, heap + heapSize, heap + heapLimit, heapSize, heapSize));
++	  Dprintf(("was: %p %p %p = 0x%x (%d) bytes\n", heap, heap + heapSize, heap + heapLimit, heapSize, heapSize));
+ 	  if (overallocateMemory)
+ 	    {
+ 	      char *base= heap + heapSize;
+-	      dprintf(("remap: %p + 0x%x (%d)\n", base, newDelta, newDelta));
++	      Dprintf(("remap: %p + 0x%x (%d)\n", base, newDelta, newDelta));
+ 	      if (MAP_FAILED == mmap(base, newDelta, MAP_PROT, MAP_FLAGS | MAP_FIXED, devZero, heapSize))
+ 		{
+ 		  perror("mmap");
+@@ -184,7 +184,7 @@ char *uxGrowMemoryBy(char *oldLimit, sqI
+ 		}
+ 	    }
+ 	  heapSize += newDelta;
+-	  dprintf(("now: %p %p %p = 0x%x (%d) bytes\n", heap, heap + heapSize, heap + heapLimit, heapSize, heapSize));
++	  Dprintf(("now: %p %p %p = 0x%x (%d) bytes\n", heap, heap + heapSize, heap + heapLimit, heapSize, heapSize));
+ 	  assert(0 == (heapSize  & ~pageMask));
+ 	}
+       return heap + heapSize;
+@@ -201,17 +201,17 @@ char *uxShrinkMemoryBy(char *oldLimit, s
+     {
+       int newSize=  max(0, valign((char *)oldLimit - heap - delta));
+       int newDelta= heapSize - newSize;
+-      dprintf(("uxGrowMemory: %p By: %d(%d) (%d -> %d)\n", oldLimit, newDelta, delta, heapSize, newSize));
++      Dprintf(("uxGrowMemory: %p By: %d(%d) (%d -> %d)\n", oldLimit, newDelta, delta, heapSize, newSize));
+       assert(0 == (newDelta & ~pageMask));
+       assert(0 == (newSize  & ~pageMask));
+       assert(newDelta >= 0);
+       if (newDelta)
+ 	{
+-	  dprintf(("was: %p %p %p = 0x%x (%d) bytes\n", heap, heap + heapSize, heap + heapLimit, heapSize, heapSize));
++	  Dprintf(("was: %p %p %p = 0x%x (%d) bytes\n", heap, heap + heapSize, heap + heapLimit, heapSize, heapSize));
+ 	  if (overallocateMemory)
+ 	    {
+ 	      char *base= heap + heapSize - newDelta;
+-	      dprintf(("unmap: %p + 0x%x (%d)\n", base, newDelta, newDelta));
++	      Dprintf(("unmap: %p + 0x%x (%d)\n", base, newDelta, newDelta));
+ 	      if (munmap(base, newDelta) < 0)
+ 		{
+ 		  perror("unmap");
+@@ -219,7 +219,7 @@ char *uxShrinkMemoryBy(char *oldLimit, s
+ 		}
+ 	    }
+ 	  heapSize -= newDelta;
+-	  dprintf(("now: %p %p %p = 0x%x (%d) bytes\n", heap, heap + heapSize, heap + heapLimit, heapSize, heapSize));
++	  Dprintf(("now: %p %p %p = 0x%x (%d) bytes\n", heap, heap + heapSize, heap + heapLimit, heapSize, heapSize));
+ 	  assert(0 == (heapSize  & ~pageMask));
+ 	}
+       return heap + heapSize;
+--- Squeak-3.10-4/platforms/unix/vm-display-fbdev/sqUnixFBDevMouseADB.c.orig	2012-02-28 17:15:35.025173344 -0300
++++ Squeak-3.10-4/platforms/unix/vm-display-fbdev/sqUnixFBDevMouseADB.c	2012-02-28 17:15:43.158173600 -0300
+@@ -37,7 +37,7 @@
+  */
+ 
+ 
+-static void ms_adb_init(_self) { dprintf("ADB init\n"); }
++static void ms_adb_init(_self) { Dprintf("ADB init\n"); }
+ 
+ 
+ static void ms_adb_handleEvents(_self)
