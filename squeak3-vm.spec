@@ -110,3 +110,11 @@ perl -pi -e 's|\binisqueak\b|inisqueak3|;' %{buildroot}%{_bindir}/mysqueak3
 %{_datadir}/pixmaps/*
 %{_datadir}/mime/packages/*
 %{_datadir}/icons/gnome/*/mimetypes/*.png
+
+
+%changelog
+* Wed Feb 29 2012 Paulo Andrade <pcpa@mandriva.com.br> 3.10.4-1
++ Revision: 781429
+- Import a squeak 3 vm (for testing purposes in case of issues with squeak 4)
+- Import a squeak 3 vm (for testing purposes in case of issues with squeak 4)
+
