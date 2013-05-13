@@ -5,7 +5,7 @@
 
 Name:		squeak3-vm
 Version:	%{major}.%{minor}
-Release:	1
+Release:	2
 Summary:	The Squeak virtual machine
 Group:		Development/Other
 License:	MIT
@@ -18,7 +18,6 @@ Patch2: 	squeak-vm-imgdir.patch
 Patch3: 	squeak-vm-tail-options.patch
 Patch4: 	squeak-vm-dprintf.patch
 Patch5: 	squeak-vm-libv4l.patch
-BuildRoot:	%{_tmppath}/%{name}-%{version}-%{release}-buildroot
 Requires(post):	desktop-file-utils
 Requires(postun): desktop-file-utils
 BuildRequires:	pkgconfig(audiofile)
