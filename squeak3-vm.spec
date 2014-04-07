@@ -3,43 +3,40 @@
 %define vmver	%{major}-%{minor}
 %define source	Squeak-%{vmver}
 
+Summary:	The Squeak virtual machine
 Name:		squeak3-vm
 Version:	%{major}.%{minor}
-Release:	2
-Summary:	The Squeak virtual machine
-Group:		Development/Other
+Release:	3
 License:	MIT
-URL:		http://squeakvm.org/unix
+Group:		Development/Other
+Url:		http://squeakvm.org/unix
 Source0:	http://ftp.squeak.org/%{major}/unix-linux/%{source}.src.tar.gz
 Source2:	squeak-desktop-files.tar.gz
 Patch0:		squeak-vm-rpath.patch
-Patch1: 	squeak-vm-install-inisqueak.patch
-Patch2: 	squeak-vm-imgdir.patch
-Patch3: 	squeak-vm-tail-options.patch
-Patch4: 	squeak-vm-dprintf.patch
-Patch5: 	squeak-vm-libv4l.patch
-Requires(post):	desktop-file-utils
-Requires(postun): desktop-file-utils
+Patch1:		squeak-vm-install-inisqueak.patch
+Patch2:		squeak-vm-imgdir.patch
+Patch3:		squeak-vm-tail-options.patch
+Patch4:		squeak-vm-dprintf.patch
+Patch5:		squeak-vm-libv4l.patch
+BuildRequires:	pkgconfig(alsa)
 BuildRequires:	pkgconfig(audiofile)
-BuildRequires:	X11-devel
-BuildRequires:	x11-proto-devel
-BuildRequires:	pkgconfig(x11)
-BuildRequires:	gcc
-BuildRequires:	desktop-file-utils
-BuildRequires:	libalsa-devel
-BuildRequires:	pkgconfig(vorbis)
-BuildRequires:	pkgconfig(theora)
-BuildRequires:	speex-devel
-BuildRequires:	dbus-devel
-BuildRequires:	pango-devel
-BuildRequires:	gstreamer0.10-devel
+BuildRequires:	pkgconfig(ext2fs)
+BuildRequires:	pkgconfig(freetype2)
+BuildRequires:	pkgconfig(dbus-1)
+BuildRequires:	pkgconfig(gl)
+BuildRequires:	pkgconfig(gstreamer-0.10)
 BuildRequires:	pkgconfig(ice)
-BuildRequires:	pkgconfig(sm)
 BuildRequires:	pkgconfig(libv4l1)
-BuildRequires:	pkgconfig(xext)
-BuildRequires:	ext2fs-devel
-BuildRequires:	dbus-devel
+BuildRequires:	pkgconfig(ogg)
+BuildRequires:	pkgconfig(pango)
+BuildRequires:	pkgconfig(sm)
+BuildRequires:	pkgconfig(speex)
+BuildRequires:	pkgconfig(theora)
 BuildRequires:	pkgconfig(uuid)
+BuildRequires:	pkgconfig(vorbis)
+BuildRequires:	pkgconfig(x11)
+BuildRequires:	pkgconfig(xext)
+BuildRequires:	pkgconfig(xproto)
 Requires:	zenity
 
 %description
@@ -48,6 +45,19 @@ language and environment based on (and largely compatible with) the original
 Smalltalk-80 system.
 
 This package contains just the Squeak virtual machine.
+
+%files
+%doc platforms/unix/ChangeLog platforms/unix/doc/{README*,LICENSE,*RELEASE_NOTES}
+%{_bindir}/*
+%{_libdir}/squeak/%{vmver}
+%{_mandir}/man*/*
+%{_datadir}/squeak
+%{_datadir}/applications/*
+%{_datadir}/pixmaps/*
+%{_datadir}/mime/packages/*
+%{_datadir}/icons/gnome/*/mimetypes/*.png
+
+#----------------------------------------------------------------------------
 
 %prep
 %setup -q -n %{source} -a 2
@@ -98,22 +108,4 @@ rm -f %{buildroot}%{_bindir}/squeak
 mv %{buildroot}%{_bindir}/inisqueak{,3}
 ln -sf %{_libdir}/squeak/%{vmver}/squeak %{buildroot}%{_bindir}/squeak3
 perl -pi -e 's|\binisqueak\b|inisqueak3|;' %{buildroot}%{_bindir}/mysqueak3
-
-%files
-%doc platforms/unix/ChangeLog platforms/unix/doc/{README*,LICENSE,*RELEASE_NOTES}
-%{_bindir}/*
-%{_libdir}/squeak/%{vmver}
-%{_mandir}/man*/*
-%{_datadir}/squeak
-%{_datadir}/applications/*
-%{_datadir}/pixmaps/*
-%{_datadir}/mime/packages/*
-%{_datadir}/icons/gnome/*/mimetypes/*.png
-
-
-%changelog
-* Wed Feb 29 2012 Paulo Andrade <pcpa@mandriva.com.br> 3.10.4-1
-+ Revision: 781429
-- Import a squeak 3 vm (for testing purposes in case of issues with squeak 4)
-- Import a squeak 3 vm (for testing purposes in case of issues with squeak 4)
 
