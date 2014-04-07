@@ -37,6 +37,7 @@ BuildRequires:	pkgconfig(vorbis)
 BuildRequires:	pkgconfig(x11)
 BuildRequires:	pkgconfig(xext)
 BuildRequires:	pkgconfig(xproto)
+BuildRequires:	pkgconfig(xt)
 Requires:	zenity
 
 %description
