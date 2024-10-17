@@ -9,7 +9,7 @@ Version:	%{major}.%{minor}
 Release:	4
 License:	MIT
 Group:		Development/Other
-Url:		http://squeakvm.org/unix
+Url:		https://squeakvm.org/unix
 Source0:	http://ftp.squeak.org/%{major}/unix-linux/%{source}.src.tar.gz
 Source2:	squeak-desktop-files.tar.gz
 Patch0:		squeak-vm-rpath.patch
