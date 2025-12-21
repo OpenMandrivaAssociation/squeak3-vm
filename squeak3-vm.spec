@@ -18,6 +18,7 @@ Patch2:		squeak-vm-imgdir.patch
 Patch3:		squeak-vm-tail-options.patch
 Patch4:		squeak-vm-dprintf.patch
 Patch5:		squeak-vm-libv4l.patch
+BuildRequires:	make
 BuildRequires:	pkgconfig(alsa)
 BuildRequires:	pkgconfig(audiofile)
 BuildRequires:	pkgconfig(ext2fs)
