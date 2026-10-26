@@ -65,12 +65,12 @@ This package contains just the Squeak virtual machine.
 %setup -q -n %{source} -a 2
 find platforms -name '*.[ch]' -exec chmod ug=rw,o=r {} \;
 
-%patch0 -p1 -b .rpath
-%patch1 -p1 -b .install-inisqueak
-%patch2 -p1 -b .imgdir
-%patch3 -p1 -b .tail-options
-%patch4 -p1
-%patch5 -p1
+%patch 0 -p1 -b .rpath
+%patch 1 -p1 -b .install-inisqueak
+%patch 2 -p1 -b .imgdir
+%patch 3 -p1 -b .tail-options
+%patch 4 -p1
+%patch 5 -p1
 
 %build
 mkdir -p bld
